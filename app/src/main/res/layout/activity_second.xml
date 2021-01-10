@@ -12,16 +12,19 @@
         android:layout_height="wrap_content"
         android:onClick="toast"
         android:text="Toast"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bt_finish"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <Button
+        android:id="@+id/bt_finish"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="toastFinish"
         android:text="Toast Finish"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/bt_toast" />

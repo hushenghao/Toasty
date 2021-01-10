@@ -5,7 +5,8 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.os.SystemClock
-import android.view.Gravity
+import android.util.Log
+import android.view.ViewGroup
 import java.util.*
 
 internal class ToastyHandler : Handler(Looper.getMainLooper()),
@@ -18,7 +19,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         private const val HIDE = 2
 
         // toast前的延迟, 防止toast show后立刻关闭页面, 使toast显示两次
-        internal const val DEFAULT_SHOW_DELAY = 100L
+        internal const val DEFAULT_SHOW_DELAY = 80L
     }
 
     private val toastQueue = LinkedList<ToastyBuilder>()
@@ -53,6 +54,8 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
             entry.builder.duration = surplus
             toastQueue.remove(entry.builder)
             toastQueue.addFirst(entry.builder)
+//            toastQueue.sortWith { o1, o2 -> o1.showWhen.compareTo(o2.showWhen) }
+//            Log.i(TAG, "hideToastInternal: " + entry.builder)
         }
 
         val t = entry.toastObj
@@ -78,10 +81,15 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         } else {
             Toasty.viewFactory.createView(attachAct, builder)
         }
+        val parent = view.parent
+        if (parent is ViewGroup) {
+            parent.removeViewInLayout(view)
+        }
 
+        Log.i(TAG, "gravity: " + builder.gravityToString(builder.gravity))
         // 垂直居中
-        val centerVertical =
-            builder.gravity == Gravity.CENTER || builder.gravity == Gravity.CENTER_VERTICAL
+        val centerVertical = builder.isCenterVertical()
+        Log.i(TAG, "isCenterVertical: $centerVertical")
         if (!builder.useOffset && centerVertical) {
             builder.offsetYdp = 0f
         }
@@ -99,6 +107,9 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
 
     private fun showNext() {
         if (toastQueue.isEmpty()) {
+            return
+        }
+        if (isShowing(currentAct)) {
             return
         }
         sendEmptyMessage(SHOW)
@@ -124,6 +135,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
     )
 
     fun show(builder: ToastyBuilder) {
+        builder.postAt = SystemClock.uptimeMillis()
         toastQueue.add(builder)
         if (isShowing(currentAct)) {
             return
@@ -132,15 +144,11 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
     }
 
     override fun onCreate(activity: Activity) {
-        currentAct = activity
+        showWithLifecycle(activity)
     }
 
     override fun onStart(activity: Activity) {
-        currentAct = activity
-        if (isShowing(activity)) {
-            return
-        }
-        showNext()
+        showWithLifecycle(activity)
     }
 
     override fun onStop(activity: Activity) {
@@ -148,13 +156,21 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
     }
 
     override fun onDestroy(activity: Activity) {
-        if (activity == currentAct) {
-            currentAct = null
-        }
         hideWithLifecycle(activity)
     }
 
+    private fun showWithLifecycle(activity: Activity) {
+        currentAct = activity
+        if (isShowing(activity)) {
+            return
+        }
+        showNext()
+    }
+
     private fun hideWithLifecycle(activity: Activity) {
+        if (activity == currentAct) {
+            currentAct = null
+        }
         for (toastEntry in showingToast) {
             if (toastEntry.attachAct == activity) {
                 removeMessages(HIDE, toastEntry)

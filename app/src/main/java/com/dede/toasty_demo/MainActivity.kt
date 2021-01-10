@@ -1,24 +1,13 @@
 package com.dede.toasty_demo
 
-import android.app.Application
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.dede.toasty.DialogToastyStrategy
 import com.dede.toasty.Toasty
 
 class MainActivity : AppCompatActivity() {
-
-    override fun attachBaseContext(newBase: Context?) {
-        super.attachBaseContext(newBase)
-        Toasty.init(
-            newBase!!.applicationContext as Application,
-            toastyStrategy = DialogToastyStrategy()
-        )
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +24,10 @@ class MainActivity : AppCompatActivity() {
 
     fun view(view: View) {
         val inflate = layoutInflater.inflate(R.layout.layout_custom_toast, null, false)
-        Toasty.with().customView(inflate).gravity(Gravity.CENTER).show()
+        Toasty.with()
+            .customView(inflate)
+            .gravity(Gravity.CENTER)
+            .duration(5000L)
+            .show()
     }
 }

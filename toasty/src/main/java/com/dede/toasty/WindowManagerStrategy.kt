@@ -6,6 +6,7 @@ import android.view.View
 import android.view.WindowManager
 
 class WindowManagerStrategy : Toasty.ToastyStrategy<View> {
+
     override fun show(activity: Activity, view: View, builder: ToastyBuilder): View {
         val params = WindowManager.LayoutParams()
         params.type = WindowManager.LayoutParams.TYPE_APPLICATION
@@ -17,9 +18,6 @@ class WindowManagerStrategy : Toasty.ToastyStrategy<View> {
         params.width = WindowManager.LayoutParams.WRAP_CONTENT
         params.height = WindowManager.LayoutParams.WRAP_CONTENT
         params.y = builder.offsetY()
-        if (view.parent != null) {
-            activity.windowManager.removeView(view)
-        }
         activity.windowManager.addView(view, params)
         return view
     }
