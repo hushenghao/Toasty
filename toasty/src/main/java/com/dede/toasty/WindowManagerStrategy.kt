@@ -6,7 +6,7 @@ import android.view.View
 import android.view.WindowManager
 
 class WindowManagerStrategy : Toasty.ToastyStrategy<View> {
-    override fun show(activity: Activity, view: View, builder: ToastBuilder): View {
+    override fun show(activity: Activity, view: View, builder: ToastyBuilder): View {
         val params = WindowManager.LayoutParams()
         params.type = WindowManager.LayoutParams.TYPE_APPLICATION
         params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or

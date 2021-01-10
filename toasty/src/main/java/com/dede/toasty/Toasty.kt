@@ -33,8 +33,14 @@ object Toasty {
         application.registerActivityLifecycleCallbacks(activityLifecycleCallback)
     }
 
-    fun with(): ToastBuilder {
-        return ToastBuilder()
+    fun with(): ToastyBuilder {
+        return ToastyBuilder()
+    }
+
+    fun with(message: CharSequence): ToastyBuilder {
+        val toastBuilder = ToastyBuilder()
+        toastBuilder.message(message)
+        return toastBuilder
     }
 
     internal fun dip(dp: Number): Int {
@@ -43,11 +49,11 @@ object Toasty {
     }
 
     interface ViewFactory {
-        fun createView(context: Context, builder: ToastBuilder): View
+        fun createView(context: Context, builder: ToastyBuilder): View
     }
 
     interface ToastyStrategy<T> {
-        fun show(activity: Activity, view: View, builder: ToastBuilder): T
+        fun show(activity: Activity, view: View, builder: ToastyBuilder): T
         fun hide(activity: Activity, t: T)
     }
 }

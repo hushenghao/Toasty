@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.os.SystemClock
+import android.view.Gravity
 import java.util.*
 
 internal class ToastyHandler : Handler(Looper.getMainLooper()),
@@ -20,7 +21,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         internal const val DEFAULT_SHOW_DELAY = 100L
     }
 
-    private val toastQueue = LinkedList<ToastBuilder>()
+    private val toastQueue = LinkedList<ToastyBuilder>()
     private val showingToast = LinkedList<ToastEntry>()
     private var currentAct: Activity? = null
 
@@ -66,7 +67,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         showNext()
     }
 
-    private fun showToastInternal(builder: ToastBuilder) {
+    private fun showToastInternal(builder: ToastyBuilder) {
         val attachAct = this.currentAct
         if (attachAct == null) {
             builder.nativeToast().show()
@@ -77,6 +78,14 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         } else {
             Toasty.viewFactory.createView(attachAct, builder)
         }
+
+        // 垂直居中
+        val centerVertical =
+            builder.gravity == Gravity.CENTER || builder.gravity == Gravity.CENTER_VERTICAL
+        if (!builder.useOffset && centerVertical) {
+            builder.offsetYdp = 0f
+        }
+
         try {
             val toastObj = Toasty.toastyStrategy.show(attachAct, view, builder)
             val toastEntry = ToastEntry(builder, toastObj, attachAct, SystemClock.uptimeMillis())
@@ -108,13 +117,13 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
     }
 
     class ToastEntry(
-        val builder: ToastBuilder,
+        val builder: ToastyBuilder,
         val toastObj: Any,
         val attachAct: Activity,
         val showWhen: Long
     )
 
-    fun show(builder: ToastBuilder) {
+    fun show(builder: ToastyBuilder) {
         toastQueue.add(builder)
         if (isShowing(currentAct)) {
             return

@@ -7,7 +7,7 @@ import android.view.WindowManager
 
 class DialogToastyStrategy : Toasty.ToastyStrategy<Dialog> {
 
-    override fun show(activity: Activity, view: View, builder: ToastBuilder): Dialog {
+    override fun show(activity: Activity, view: View, builder: ToastyBuilder): Dialog {
         val dialog = Dialog(activity, R.style.Toasty_Dialog)
         dialog.setContentView(view)
         dialog.window?.let {
