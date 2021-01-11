@@ -25,6 +25,16 @@ class DialogToastyStrategy : Toasty.ToastyStrategy<Dialog> {
         return dialog
     }
 
+    override fun update(activity: Activity, view: View, builder: ToastyBuilder, t: Dialog) {
+        t.window?.let {
+            val params = it.attributes
+            params.gravity = builder.gravity
+            params.y = builder.offsetYpx()
+            it.attributes = params
+        }
+        t.setContentView(view)
+    }
+
     override fun hide(activity: Activity, t: Dialog) {
         t.dismiss()
     }

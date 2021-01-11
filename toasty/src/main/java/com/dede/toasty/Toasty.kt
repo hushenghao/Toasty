@@ -11,6 +11,10 @@ object Toasty {
     const val TOAST_SHORT = 2000L
     const val TOAST_LONG = 3000L
 
+    const val REPLACE_NOW = 1
+    const val REPLACE_BEHIND = 2
+    const val DISCARD = -1
+
     internal val activityLifecycleCallback = ActivityLifecycleCallback()
     internal val toastyHandler = ToastyHandler()
 
@@ -54,6 +58,7 @@ object Toasty {
 
     interface ToastyStrategy<T> {
         fun show(activity: Activity, view: View, builder: ToastyBuilder): T
+        fun update(activity: Activity, view: View, builder: ToastyBuilder, t: T)
         fun hide(activity: Activity, t: T)
     }
 }

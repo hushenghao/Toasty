@@ -27,6 +27,18 @@ class PopupWindowStrategy : Toasty.ToastyStrategy<PopupWindow> {
         return popupWindow
     }
 
+    override fun update(activity: Activity, view: View, builder: ToastyBuilder, t: PopupWindow) {
+        val offset = if (builder.isCenterVertical()) 0 else getNavigationBarHeight(activity)
+        // PopupWindow无法更新gravity
+        t.contentView = view
+        t.update(
+            0,
+            builder.offsetYpx() + offset,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+    }
+
     override fun hide(activity: Activity, t: PopupWindow) {
         t.dismiss()
     }

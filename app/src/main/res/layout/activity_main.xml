@@ -8,24 +8,39 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/bt_toast"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="toast"
         android:text="Toast" />
 
     <Button
-        android:id="@+id/bt_open"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="open"
         android:text="打开新的Activity" />
 
     <Button
-        android:id="@+id/bt_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="view"
-        android:text="自定义View" />
+        android:text="自定义Toast" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="replace"
+        android:text="REPLACE" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="behind"
+        android:text="BEHIND" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="discard"
+        android:text="DISCARD" />
 
 </LinearLayout>

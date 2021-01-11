@@ -16,6 +16,7 @@ class ToastyBuilder {
     internal var duration: Long = Toasty.TOAST_SHORT
     internal var offsetYdp: Float = 50f
     internal var gravity: Int = Gravity.BOTTOM
+    internal var replaceType: Int = Toasty.REPLACE_BEHIND
     internal var customView: View? = null
 
     internal var showDelay = ToastyHandler.DEFAULT_SHOW_DELAY
@@ -45,6 +46,18 @@ class ToastyBuilder {
             }
             else -> {
                 Log.w(TAG, "unSupport gravity: ${gravityToString(gravity)}")
+            }
+        }
+        return this
+    }
+
+    fun replaceType(replaceType: Int): ToastyBuilder {
+        when (replaceType) {
+            Toasty.REPLACE_NOW, Toasty.REPLACE_BEHIND, Toasty.DISCARD -> {
+                this.replaceType = replaceType
+            }
+            else -> {
+                Log.w(TAG, "unSupport replaceType: $replaceType")
             }
         }
         return this
