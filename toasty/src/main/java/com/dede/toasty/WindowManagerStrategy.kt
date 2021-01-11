@@ -22,9 +22,10 @@ class WindowManagerStrategy : Toasty.ToastyStrategy<View> {
         return view
     }
 
-    override fun update(activity: Activity, view: View, builder: ToastyBuilder, t: View) {
-        hide(activity, t)
+    override fun update(activity: Activity, view: View, builder: ToastyBuilder, old: View): View {
+        hide(activity, old)
         show(activity, view, builder)
+        return view
     }
 
     override fun hide(activity: Activity, t: View) {

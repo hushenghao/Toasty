@@ -126,9 +126,9 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         val view = prepareToastView(builder, attachAct)
 
         try {
-            Toasty.toastyStrategy.update(attachAct, view, builder, toastEntry.toastObj)
-            val newEntry =
-                ToastEntry(builder, toastEntry.toastObj, attachAct, SystemClock.uptimeMillis())
+            val toastObj =
+                Toasty.toastyStrategy.update(attachAct, view, builder, toastEntry.toastObj)
+            val newEntry = ToastEntry(builder, toastObj, attachAct, SystemClock.uptimeMillis())
             showingToast.add(newEntry)
             val message = Message.obtain(this, HIDE, newEntry)
             sendMessageDelayed(message, builder.duration)

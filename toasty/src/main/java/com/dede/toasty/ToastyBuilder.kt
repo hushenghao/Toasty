@@ -45,7 +45,7 @@ class ToastyBuilder {
                 this.gravity = gravity or Gravity.CENTER_HORIZONTAL
             }
             else -> {
-                Log.w(TAG, "unSupport gravity: ${gravityToString(gravity)}")
+                throw IllegalArgumentException("Not Support gravity: ${gravityToString(gravity)}")
             }
         }
         return this
@@ -57,7 +57,7 @@ class ToastyBuilder {
                 this.replaceType = replaceType
             }
             else -> {
-                Log.w(TAG, "unSupport replaceType: $replaceType")
+                throw IllegalArgumentException("Not Support replaceType: $replaceType")
             }
         }
         return this

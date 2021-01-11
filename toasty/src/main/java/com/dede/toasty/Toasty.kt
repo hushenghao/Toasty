@@ -58,7 +58,7 @@ object Toasty {
 
     interface ToastyStrategy<T> {
         fun show(activity: Activity, view: View, builder: ToastyBuilder): T
-        fun update(activity: Activity, view: View, builder: ToastyBuilder, t: T)
+        fun update(activity: Activity, view: View, builder: ToastyBuilder, old: T): T
         fun hide(activity: Activity, t: T)
     }
 }
