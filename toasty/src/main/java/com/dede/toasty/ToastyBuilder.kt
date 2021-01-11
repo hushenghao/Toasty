@@ -21,7 +21,7 @@ class ToastyBuilder {
 
     internal var showDelay = ToastyHandler.DEFAULT_SHOW_DELAY
 
-    fun message(message: CharSequence): ToastyBuilder {
+    fun message(message: CharSequence?): ToastyBuilder {
         this.message = message
         return this
     }

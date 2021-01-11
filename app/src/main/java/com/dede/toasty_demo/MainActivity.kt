@@ -68,4 +68,8 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         Log.i(TAG, "onDestroy: ")
     }
+
+    fun old(view: View) {
+        com.xhe.toasty.Toasty.with(this).message("兼容旧版本Toasty").show()
+    }
 }

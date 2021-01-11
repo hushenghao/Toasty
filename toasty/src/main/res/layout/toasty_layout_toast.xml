@@ -7,10 +7,11 @@
         android:id="@+id/tv_toast"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="15dp"
         android:background="@drawable/toasty_shape_toast_bg"
         android:paddingHorizontal="25dp"
         android:paddingVertical="15dp"
-        android:textColor="@color/white"
+        android:textColor="@android:color/white"
         android:textSize="16sp" />
 
 </FrameLayout>

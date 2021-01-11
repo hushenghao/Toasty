@@ -24,6 +24,7 @@ object Toasty {
     internal lateinit var viewFactory: ViewFactory
     internal lateinit var toastyStrategy: ToastyStrategy<Any>
 
+    @JvmStatic
     @JvmOverloads
     fun init(
         application: Application,
@@ -37,11 +38,9 @@ object Toasty {
         application.registerActivityLifecycleCallbacks(activityLifecycleCallback)
     }
 
-    fun with(): ToastyBuilder {
-        return ToastyBuilder()
-    }
-
-    fun with(message: CharSequence): ToastyBuilder {
+    @JvmStatic
+    @JvmOverloads
+    fun with(message: CharSequence? = null): ToastyBuilder {
         val toastBuilder = ToastyBuilder()
         toastBuilder.message(message)
         return toastBuilder
