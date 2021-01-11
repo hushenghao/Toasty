@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.view.View
+import androidx.annotation.StringRes
 import kotlin.math.roundToInt
 
 object Toasty {
@@ -44,6 +45,13 @@ object Toasty {
         val toastBuilder = ToastyBuilder()
         toastBuilder.message(message)
         return toastBuilder
+    }
+
+    @JvmStatic
+    fun with(@StringRes resId: Int): ToastyBuilder {
+        val toastyBuilder = ToastyBuilder()
+        toastyBuilder.message(resId)
+        return toastyBuilder
     }
 
     internal fun dip(dp: Number): Int {

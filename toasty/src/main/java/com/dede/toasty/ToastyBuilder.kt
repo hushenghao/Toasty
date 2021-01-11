@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.Toast
+import androidx.annotation.StringRes
 
 class ToastyBuilder {
 
@@ -23,6 +24,11 @@ class ToastyBuilder {
 
     fun message(message: CharSequence?): ToastyBuilder {
         this.message = message
+        return this
+    }
+
+    fun message(@StringRes resId: Int): ToastyBuilder {
+        this.message = Toasty.applicationContext.getText(resId)
         return this
     }
 
