@@ -18,7 +18,7 @@ class DialogToastyStrategy : Toasty.ToastyStrategy<Dialog> {
             )
             val params = it.attributes
             params.gravity = builder.gravity
-            params.y = builder.offsetY()
+            params.y = builder.offsetYpx()
             it.attributes = params
         }
         dialog.show()

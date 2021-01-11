@@ -5,7 +5,6 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.os.SystemClock
-import android.util.Log
 import android.view.ViewGroup
 import java.util.*
 
@@ -18,8 +17,11 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         private const val SHOW = 1
         private const val HIDE = 2
 
-        // toast前的延迟, 防止toast show后立刻关闭页面, 使toast显示两次
+        // toast前的延迟, 防止toast显示后立刻关闭页面, 使toast显示两次
         internal const val DEFAULT_SHOW_DELAY = 80L
+
+        // toast忽略重新显示的时长. 当已显示时间大于1s, 切换页面时就算没有显示完也不再重新显示
+        private const val IGNORE_RESHOW_DURATION = 1000L
     }
 
     private val toastQueue = LinkedList<ToastyBuilder>()
@@ -36,6 +38,9 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
                 if (toastQueue.isEmpty()) {
                     return
                 }
+                if (isFinish(this.currentAct)) {
+                    return
+                }
                 val toastBuilder = toastQueue.pop()
                 showToastInternal(toastBuilder)
             }
@@ -49,13 +54,11 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
     private fun hideToastInternal(entry: ToastEntry) {
         val attachAct = entry.attachAct
         val surplus = SystemClock.uptimeMillis() - entry.showWhen
-        if (surplus < entry.builder.duration) {
+        if (surplus < IGNORE_RESHOW_DURATION && surplus < entry.builder.duration) {
             // 没有显示完，更新显示时间重新显示
             entry.builder.duration = surplus
             toastQueue.remove(entry.builder)
             toastQueue.addFirst(entry.builder)
-//            toastQueue.sortWith { o1, o2 -> o1.showWhen.compareTo(o2.showWhen) }
-//            Log.i(TAG, "hideToastInternal: " + entry.builder)
         }
 
         val t = entry.toastObj
@@ -83,15 +86,10 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         }
         val parent = view.parent
         if (parent is ViewGroup) {
-            parent.removeViewInLayout(view)
-        }
-
-        Log.i(TAG, "gravity: " + builder.gravityToString(builder.gravity))
-        // 垂直居中
-        val centerVertical = builder.isCenterVertical()
-        Log.i(TAG, "isCenterVertical: $centerVertical")
-        if (!builder.useOffset && centerVertical) {
-            builder.offsetYdp = 0f
+            try {
+                parent.removeViewInLayout(view)
+            } catch (ignore: Exception) {
+            }
         }
 
         try {
@@ -112,12 +110,16 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         if (isShowing(currentAct)) {
             return
         }
-        sendEmptyMessage(SHOW)
+        val message = Message.obtain(this, SHOW, currentAct)
+        sendMessage(message)
     }
 
     private fun isShowing(activity: Activity?): Boolean {
         if (activity == null) {
             return false
+        }
+        if (hasMessages(SHOW, activity)) {
+            return true
         }
         for (toastEntry in showingToast) {
             if (toastEntry.attachAct == activity) {
@@ -125,6 +127,12 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
             }
         }
         return false
+    }
+
+    private fun isFinish(activity: Activity?): Boolean {
+        if (activity == null) return true
+
+        return activity.isFinishing || activity.isDestroyed
     }
 
     class ToastEntry(
@@ -135,12 +143,15 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
     )
 
     fun show(builder: ToastyBuilder) {
-        builder.postAt = SystemClock.uptimeMillis()
         toastQueue.add(builder)
+        if (isFinish(currentAct)) {
+            return
+        }
         if (isShowing(currentAct)) {
             return
         }
-        sendEmptyMessageDelayed(SHOW, builder.showDelay)
+        val message = Message.obtain(this, SHOW, currentAct)
+        sendMessageDelayed(message, builder.showDelay)
     }
 
     override fun onCreate(activity: Activity) {
@@ -171,6 +182,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         if (activity == currentAct) {
             currentAct = null
         }
+        removeMessages(SHOW, activity)
         for (toastEntry in showingToast) {
             if (toastEntry.attachAct == activity) {
                 removeMessages(HIDE, toastEntry)

@@ -6,12 +6,16 @@ import android.os.Looper
 import android.os.Message
 import android.widget.Toast
 
+/**
+ * fix Android N 系统toast崩溃
+ */
 internal object ToastCompat {
 
+    private val isN =
+        Build.VERSION.SDK_INT == Build.VERSION_CODES.N || Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1
+
     fun wrapper(toast: Toast): Toast {
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.N ||
-            Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1
-        ) {
+        if (isN) {
             try {
                 val mNTField = Toast::class.java.getDeclaredField("mTN")
                 mNTField.isAccessible = true

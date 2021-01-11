@@ -1,20 +1,22 @@
 package com.dede.toasty
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.Toast
 
 class ToastyBuilder {
 
+    companion object {
+        private const val TAG = "ToastyBuilder"
+    }
+
     internal var message: CharSequence? = null
     internal var duration: Long = Toasty.TOAST_SHORT
     internal var offsetYdp: Float = 50f
-    internal var useOffset = false
-    internal var gravity: Int = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+    internal var gravity: Int = Gravity.BOTTOM
     internal var customView: View? = null
-
-    internal var postAt: Long = 0L
 
     internal var showDelay = ToastyHandler.DEFAULT_SHOW_DELAY
 
@@ -28,14 +30,23 @@ class ToastyBuilder {
         return this
     }
 
-    fun offsetY(offsetYdp: Float): ToastyBuilder {
-        this.offsetYdp = offsetYdp
-        this.useOffset = true
+    fun offsetY(dp: Float): ToastyBuilder {
+        this.offsetYdp = dp
         return this
     }
 
     fun gravity(gravity: Int): ToastyBuilder {
-        this.gravity = gravity
+        when (gravity) {
+            Gravity.CENTER -> {
+                this.gravity = gravity
+            }
+            Gravity.CENTER_VERTICAL, Gravity.TOP, Gravity.BOTTOM -> {
+                this.gravity = gravity or Gravity.CENTER_HORIZONTAL
+            }
+            else -> {
+                Log.w(TAG, "unSupport gravity: ${gravityToString(gravity)}")
+            }
+        }
         return this
     }
 
@@ -44,7 +55,7 @@ class ToastyBuilder {
         return this
     }
 
-    internal fun offsetY(): Int {
+    fun offsetYpx(): Int {
         return Toasty.dip(this.offsetYdp)
     }
 
@@ -60,6 +71,7 @@ class ToastyBuilder {
     }
 
     fun show() {
+        Log.i(TAG, "gravity: " + gravityToString(gravity))
         Toasty.toastyHandler.show(this)
     }
 
@@ -81,7 +93,7 @@ class ToastyBuilder {
         return gravity == Gravity.CENTER || gravity == Gravity.CENTER_VERTICAL
     }
 
-    fun gravityToString(gravity: Int): String {
+    internal fun gravityToString(gravity: Int): String {
         val result = StringBuilder()
         if (gravity and Gravity.FILL == Gravity.FILL) {
             result.append("FILL").append(' ')

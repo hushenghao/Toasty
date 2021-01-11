@@ -22,7 +22,7 @@ class PopupWindowStrategy : Toasty.ToastyStrategy<PopupWindow> {
             parent,
             builder.gravity,
             0,
-            builder.offsetY() + offset
+            builder.offsetYpx() + offset
         )
         return popupWindow
     }
