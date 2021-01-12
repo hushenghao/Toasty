@@ -7,6 +7,7 @@ import android.os.Message
 import android.os.SystemClock
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import java.util.*
 
 internal class ToastyHandler : Handler(Looper.getMainLooper()),
@@ -26,7 +27,8 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
     }
 
     private val toastQueue = LinkedList<ToastyBuilder>()
-    private val showingToast = LinkedList<ToastEntry>()
+    // 当前显示的Toast
+    private var showingToastEntry: ToastEntry? = null
     private var currentAct: Activity? = null
 
     init {
@@ -39,11 +41,8 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
                 if (toastQueue.isEmpty()) {
                     return
                 }
-                if (isFinish(this.currentAct)) {
-                    return
-                }
                 val toastBuilder = toastQueue.pop()
-                val toastEntry = findCurrentShowing()
+                val toastEntry = showingToastEntry
                 when (toastBuilder.replaceType) {
                     Toasty.REPLACE_NOW -> {
                         if (toastEntry != null) {
@@ -75,6 +74,14 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
 
     private fun hideToastInternal(entry: ToastEntry) {
         val attachAct = entry.attachAct
+        if (attachAct == null) {
+            Toasty.nativeToastStrategy.hideNative(entry.toastObj as? Toast)
+
+            showingToastEntry = null
+            showNext()
+            return
+        }
+
         val surplus = SystemClock.uptimeMillis() - entry.showWhen
         if (surplus < IGNORE_RESHOW_DURATION && surplus < entry.builder.duration) {
             // 没有显示完，更新显示时间重新显示
@@ -90,23 +97,27 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
             e.printStackTrace()
         }
 
-        showingToast.remove(entry)
-
+        showingToastEntry = null
         showNext()
     }
 
     private fun showToastInternal(builder: ToastyBuilder) {
         val attachAct = this.currentAct
-        if (attachAct == null) {
-            builder.nativeToast().show()
+        if (attachAct == null || isFinish(attachAct)) {
+            val toast = Toasty.nativeToastStrategy.showNative(builder)
+            val newEntry = ToastEntry(builder, toast, null, -1)
+            showingToastEntry = newEntry
+            val message = Message.obtain(this, HIDE, newEntry)
+            sendMessageDelayed(message, builder.nativeDelay())
             return
         }
+
         val view = prepareToastView(builder, attachAct)
 
         try {
             val toastObj = Toasty.toastyStrategy.show(attachAct, view, builder)
             val toastEntry = ToastEntry(builder, toastObj, attachAct, SystemClock.uptimeMillis())
-            showingToast.add(toastEntry)
+            showingToastEntry = toastEntry
             val message = Message.obtain(this, HIDE, toastEntry)
             sendMessageDelayed(message, builder.duration)
         } catch (e: Exception) {
@@ -116,20 +127,24 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
 
     private fun updateToastInternal(builder: ToastyBuilder, toastEntry: ToastEntry) {
         removeMessages(HIDE, toastEntry)
-        showingToast.remove(toastEntry)
 
         val attachAct = this.currentAct
-        if (attachAct == null) {
-            builder.nativeToast().show()
+        if (attachAct == null || isFinish(attachAct)) {
+            val toast = Toasty.nativeToastStrategy.updateNative(builder, toastEntry.toastObj as? Toast)
+            val newEntry = ToastEntry(builder, toast, null, -1)
+            showingToastEntry = newEntry
+            val message = Message.obtain(this, HIDE, newEntry)
+            sendMessageDelayed(message, builder.nativeDelay())
             return
         }
+
         val view = prepareToastView(builder, attachAct)
 
         try {
             val toastObj =
                 Toasty.toastyStrategy.update(attachAct, view, builder, toastEntry.toastObj)
             val newEntry = ToastEntry(builder, toastObj, attachAct, SystemClock.uptimeMillis())
-            showingToast.add(newEntry)
+            showingToastEntry = newEntry
             val message = Message.obtain(this, HIDE, newEntry)
             sendMessageDelayed(message, builder.duration)
         } catch (e: Exception) {
@@ -165,28 +180,10 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
     }
 
     private fun isShowing(activity: Activity?): Boolean {
-        if (activity == null) {
-            return false
-        }
         if (hasMessages(SHOW, activity)) {
             return true
         }
-        for (toastEntry in showingToast) {
-            if (toastEntry.attachAct == activity) {
-                return true
-            }
-        }
-        return false
-    }
-
-    private fun findCurrentShowing(): ToastEntry? {
-        val currentAct = this.currentAct ?: return null
-        for (toastEntry in showingToast) {
-            if (toastEntry.attachAct == currentAct) {
-                return toastEntry
-            }
-        }
-        return null
+        return showingToastEntry != null
     }
 
     private fun isFinish(activity: Activity?): Boolean {
@@ -198,12 +195,13 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
     class ToastEntry(
         val builder: ToastyBuilder,
         val toastObj: Any,
-        val attachAct: Activity,
+        val attachAct: Activity?,
         val showWhen: Long
     )
 
     fun show(builder: ToastyBuilder) {
         if (builder.replaceType == Toasty.REPLACE_NOW) {
+            builder.showDelay = 0L
             toastQueue.addFirst(builder)
         } else {
             toastQueue.add(builder)
@@ -241,12 +239,10 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
             currentAct = null
         }
         removeMessages(SHOW, activity)
-        for (toastEntry in showingToast) {
-            if (toastEntry.attachAct == activity) {
-                removeMessages(HIDE, toastEntry)
-                hideToastInternal(toastEntry)
-                return
-            }
+        val toastEntry = showingToastEntry
+        if (toastEntry != null) {
+            removeMessages(HIDE, toastEntry)
+            hideToastInternal(toastEntry)
         }
     }
 }

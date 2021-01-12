@@ -10,7 +10,7 @@ import kotlin.math.roundToInt
 object Toasty {
 
     const val TOAST_SHORT = 2000L
-    const val TOAST_LONG = 3000L
+    const val TOAST_LONG = 3500L
 
     const val REPLACE_NOW = 1
     const val REPLACE_BEHIND = 2
@@ -24,6 +24,7 @@ object Toasty {
 
     internal lateinit var viewFactory: ViewFactory
     internal lateinit var toastyStrategy: ToastyStrategy<Any>
+    internal val nativeToastStrategy: NativeToastStrategy = NativeToastStrategy()
 
     @JvmStatic
     @JvmOverloads

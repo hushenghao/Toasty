@@ -43,10 +43,4 @@
         android:onClick="discard"
         android:text="DISCARD" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="old"
-        android:text="兼容老的Toasty库" />
-
 </LinearLayout>
