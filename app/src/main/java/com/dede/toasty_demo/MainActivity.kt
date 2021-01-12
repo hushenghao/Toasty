@@ -69,4 +69,8 @@ class MainActivity : AppCompatActivity() {
         Log.i(TAG, "onDestroy: ")
     }
 
+    fun _native(view: View) {
+        Toasty.with("原生Toast").nativeToast().show()
+    }
+
 }

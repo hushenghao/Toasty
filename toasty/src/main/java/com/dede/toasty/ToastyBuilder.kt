@@ -17,6 +17,7 @@ class ToastyBuilder {
     internal var gravity: Int = Gravity.BOTTOM
     internal var replaceType: Int = Toasty.REPLACE_BEHIND
     internal var customView: View? = null
+    internal var isNative: Boolean = false
 
     internal var showDelay = ToastyHandler.DEFAULT_SHOW_DELAY
 
@@ -65,6 +66,9 @@ class ToastyBuilder {
         when (replaceType) {
             Toasty.REPLACE_NOW, Toasty.REPLACE_BEHIND, Toasty.DISCARD -> {
                 this.replaceType = replaceType
+                if (replaceType == Toasty.REPLACE_NOW) {
+                    this.showDelay = 0L
+                }
             }
             else -> {
                 throw IllegalArgumentException("Not Support replaceType: $replaceType")
@@ -80,6 +84,12 @@ class ToastyBuilder {
 
     fun offsetYpx(): Int {
         return Toasty.dip(this.offsetYdp)
+    }
+
+    fun nativeToast(): ToastyBuilder {
+        this.showDelay = 0L
+        this.isNative = true
+        return this
     }
 
     fun show() {

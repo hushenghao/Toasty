@@ -1,11 +1,10 @@
 package com.dede.toasty
 
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 
 
-internal class NativeToastStrategy {
+internal class NativeToastImpl {
 
     companion object {
         // 系统toast显示时长
@@ -14,7 +13,7 @@ internal class NativeToastStrategy {
     }
 
     fun showNative(builder: ToastyBuilder): Toast {
-        val toast = builder.makeToast()
+        val toast = builder.makeNativeToast()
         setCustomView(toast, builder.customView)
         toast.setGravity(builder.gravity, 0, builder.offsetYpx())
         toast.show()
@@ -22,7 +21,7 @@ internal class NativeToastStrategy {
     }
 
     fun updateNative(builder: ToastyBuilder, old: Toast?): Toast {
-        val toast = old ?: builder.makeToast()
+        val toast = old ?: builder.makeNativeToast()
         toast.duration = builder.nativeDuration()
         toast.setText(builder.message)
         setCustomView(toast, builder.customView)
@@ -33,15 +32,12 @@ internal class NativeToastStrategy {
 
     private fun setCustomView(toast: Toast, customView: View?) {
         if (customView == null) return
-        val parent = customView.parent
-        if (parent is ViewGroup) {
-            parent.removeViewInLayout(customView)
-        }
+        customView.detachLayout()
         toast.view = customView
     }
 
-    fun hideNative(t: Toast?) {
-        t?.cancel()
+    fun hideNative(toast: Toast?) {
+        toast?.cancel()
     }
 
 }

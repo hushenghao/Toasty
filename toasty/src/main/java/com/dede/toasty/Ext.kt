@@ -3,10 +3,7 @@ package com.dede.toasty
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources
-import android.view.Gravity
-import android.view.KeyCharacterMap
-import android.view.KeyEvent
-import android.view.ViewConfiguration
+import android.view.*
 import android.widget.Toast
 
 
@@ -31,18 +28,25 @@ internal fun Context.hasNavigationBar(): Boolean {
 }
 
 
+internal fun View.detachLayout() {
+    val parent = this.parent
+    if (parent is ViewGroup) {
+        parent.removeViewInLayout(this)
+    }
+}
+
+
 internal fun ToastyBuilder.nativeDuration(): Int {
     return if (this.duration == Toasty.TOAST_LONG) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
 }
 
 internal fun ToastyBuilder.nativeDelay(): Long {
-    return if (this.duration == Toasty.TOAST_LONG) NativeToastStrategy.LONG_DELAY else NativeToastStrategy.SHORT_DELAY
+    return if (this.duration == Toasty.TOAST_LONG) NativeToastImpl.LONG_DELAY else NativeToastImpl.SHORT_DELAY
 }
 
 @SuppressLint("ShowToast")
-internal fun ToastyBuilder.makeToast(): Toast {
-    val toast = Toast.makeText(Toasty.applicationContext, this.message, this.nativeDuration())
-    return ToastCompat.wrapper(toast)
+internal fun ToastyBuilder.makeNativeToast(): Toast {
+    return ToastCompat.makeText(Toasty.applicationContext, this.message, this.nativeDuration())
 }
 
 internal fun ToastyBuilder.gravityToString(): String {

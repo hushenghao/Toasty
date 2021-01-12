@@ -24,7 +24,7 @@ object Toasty {
 
     internal lateinit var viewFactory: ViewFactory
     internal lateinit var toastyStrategy: ToastyStrategy<Any>
-    internal val nativeToastStrategy: NativeToastStrategy = NativeToastStrategy()
+    internal val nativeToastImpl: NativeToastImpl = NativeToastImpl()
 
     @JvmStatic
     @JvmOverloads

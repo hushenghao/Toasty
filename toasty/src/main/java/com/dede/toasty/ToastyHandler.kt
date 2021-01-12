@@ -6,7 +6,6 @@ import android.os.Looper
 import android.os.Message
 import android.os.SystemClock
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import java.util.*
 
@@ -27,6 +26,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
     }
 
     private val toastQueue = LinkedList<ToastyBuilder>()
+
     // 当前显示的Toast
     private var showingToastEntry: ToastEntry? = null
     private var currentAct: Activity? = null
@@ -41,23 +41,31 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
                 if (toastQueue.isEmpty()) {
                     return
                 }
-                val toastBuilder = toastQueue.pop()
+                val toastBuilder = toastQueue.pop()// 消费当前toast
                 val toastEntry = showingToastEntry
                 when (toastBuilder.replaceType) {
                     Toasty.REPLACE_NOW -> {
                         if (toastEntry != null) {
-                            updateToastInternal(toastBuilder, toastEntry)
+                            if (toastBuilder.isNative == toastEntry.builder.isNative) {
+                                // 类型相同才能替换
+                                updateToastInternal(toastBuilder, toastEntry)
+                            } else {
+                                // 先隐藏再显示
+                                hideToastInternal(toastEntry)
+                                showToastInternal(toastBuilder)
+                            }
                             return
                         }
                     }
                     Toasty.DISCARD -> {
                         if (toastEntry != null) {
+                            // 丢弃 不需要处理
                             return
                         }
                     }
                     Toasty.REPLACE_BEHIND -> {
                         if (toastEntry != null) {
-                            // 重新放到队首
+                            // 上面已经消费了toast, 重新放到队首
                             toastQueue.addFirst(toastBuilder)
                             return
                         }
@@ -74,10 +82,9 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
 
     private fun hideToastInternal(entry: ToastEntry) {
         val attachAct = entry.attachAct
-        if (attachAct == null) {
-            Toasty.nativeToastStrategy.hideNative(entry.toastObj as? Toast)
+        if (attachAct == null || entry.builder.isNative) {
+            Toasty.nativeToastImpl.hideNative(entry.toastObj as? Toast)
 
-            showingToastEntry = null
             showNext()
             return
         }
@@ -97,18 +104,15 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
             e.printStackTrace()
         }
 
-        showingToastEntry = null
         showNext()
     }
 
     private fun showToastInternal(builder: ToastyBuilder) {
         val attachAct = this.currentAct
-        if (attachAct == null || isFinish(attachAct)) {
-            val toast = Toasty.nativeToastStrategy.showNative(builder)
-            val newEntry = ToastEntry(builder, toast, null, -1)
-            showingToastEntry = newEntry
-            val message = Message.obtain(this, HIDE, newEntry)
-            sendMessageDelayed(message, builder.nativeDelay())
+        if (builder.isNative || attachAct == null || isFinish(attachAct)) {
+            val toast = Toasty.nativeToastImpl.showNative(builder)
+            val newEntry = ToastEntry(builder, toast, attachAct, -1)
+            sendHideMessage(newEntry, builder.nativeDelay())
             return
         }
 
@@ -117,24 +121,20 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         try {
             val toastObj = Toasty.toastyStrategy.show(attachAct, view, builder)
             val toastEntry = ToastEntry(builder, toastObj, attachAct, SystemClock.uptimeMillis())
-            showingToastEntry = toastEntry
-            val message = Message.obtain(this, HIDE, toastEntry)
-            sendMessageDelayed(message, builder.duration)
+            sendHideMessage(toastEntry, builder.duration)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     private fun updateToastInternal(builder: ToastyBuilder, toastEntry: ToastEntry) {
-        removeMessages(HIDE, toastEntry)
+        cancelHideMessage(toastEntry)
 
         val attachAct = this.currentAct
-        if (attachAct == null || isFinish(attachAct)) {
-            val toast = Toasty.nativeToastStrategy.updateNative(builder, toastEntry.toastObj as? Toast)
-            val newEntry = ToastEntry(builder, toast, null, -1)
-            showingToastEntry = newEntry
-            val message = Message.obtain(this, HIDE, newEntry)
-            sendMessageDelayed(message, builder.nativeDelay())
+        if (builder.isNative || attachAct == null || isFinish(attachAct)) {
+            val toast = Toasty.nativeToastImpl.updateNative(builder, toastEntry.toastObj as? Toast)
+            val newEntry = ToastEntry(builder, toast, attachAct, -1)
+            sendHideMessage(newEntry, builder.nativeDelay())
             return
         }
 
@@ -144,9 +144,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
             val toastObj =
                 Toasty.toastyStrategy.update(attachAct, view, builder, toastEntry.toastObj)
             val newEntry = ToastEntry(builder, toastObj, attachAct, SystemClock.uptimeMillis())
-            showingToastEntry = newEntry
-            val message = Message.obtain(this, HIDE, newEntry)
-            sendMessageDelayed(message, builder.duration)
+            sendHideMessage(newEntry, builder.duration)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -158,25 +156,19 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         } else {
             Toasty.viewFactory.createView(attachAct, builder)
         }
-        val parent = view.parent
-        if (parent is ViewGroup) {
-            try {
-                parent.removeViewInLayout(view)
-            } catch (ignore: Exception) {
-            }
-        }
+        view.detachLayout()
         return view
     }
 
     private fun showNext() {
+        showingToastEntry = null
         if (toastQueue.isEmpty()) {
             return
         }
         if (isShowing(currentAct)) {
             return
         }
-        val message = Message.obtain(this, SHOW, currentAct)
-        sendMessage(message)
+        sendShowMessage(currentAct)
     }
 
     private fun isShowing(activity: Activity?): Boolean {
@@ -201,13 +193,11 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
 
     fun show(builder: ToastyBuilder) {
         if (builder.replaceType == Toasty.REPLACE_NOW) {
-            builder.showDelay = 0L
             toastQueue.addFirst(builder)
         } else {
             toastQueue.add(builder)
         }
-        val message = Message.obtain(this, SHOW, currentAct)
-        sendMessageDelayed(message, builder.showDelay)
+        sendShowMessage(currentAct, builder.showDelay)
     }
 
     override fun onCreate(activity: Activity) {
@@ -238,11 +228,30 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         if (activity == currentAct) {
             currentAct = null
         }
-        removeMessages(SHOW, activity)
+        cancelShowMessage(activity)
         val toastEntry = showingToastEntry
         if (toastEntry != null) {
-            removeMessages(HIDE, toastEntry)
-            hideToastInternal(toastEntry)
+            cancelHideMessage(toastEntry)
+            sendHideMessage(toastEntry)
         }
+    }
+
+    private fun cancelShowMessage(obj: Activity?) {
+        removeMessages(SHOW, obj)
+    }
+
+    private fun sendShowMessage(obj: Activity?, delayMillis: Long = 0L) {
+        val message = Message.obtain(this, SHOW, obj)
+        sendMessageDelayed(message, delayMillis)
+    }
+
+    private fun cancelHideMessage(obj: ToastEntry) {
+        removeMessages(HIDE, obj)
+    }
+
+    private fun sendHideMessage(obj: ToastEntry, delayMillis: Long = 0L) {
+        showingToastEntry = obj
+        val message = Message.obtain(this, HIDE, obj)
+        sendMessageDelayed(message, delayMillis)
     }
 }

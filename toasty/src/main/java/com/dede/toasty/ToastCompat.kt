@@ -1,10 +1,12 @@
 package com.dede.toasty
 
+import android.content.Context
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.widget.Toast
+import androidx.annotation.StringRes
 
 /**
  * fix Android N 系统toast崩溃
@@ -30,6 +32,14 @@ internal object ToastCompat {
             }
         }
         return toast
+    }
+
+    fun makeText(context: Context, text: CharSequence?, duration: Int): Toast {
+        return wrapper(Toast.makeText(context, text, duration))
+    }
+
+    fun makeText(context: Context, @StringRes resId: Int, duration: Int): Toast {
+        return wrapper(Toast.makeText(context, resId, duration))
     }
 
     private class SafeHandler(val base: Handler) : Handler(Looper.getMainLooper(), null) {
