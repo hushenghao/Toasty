@@ -50,6 +50,12 @@ class ToastyBuilder {
             Gravity.CENTER_VERTICAL, Gravity.TOP, Gravity.BOTTOM -> {
                 this.gravity = gravity or Gravity.CENTER_HORIZONTAL
             }
+            Gravity.START -> {
+                this.gravity = Gravity.TOP
+            }
+            Gravity.END -> {
+                this.gravity = Gravity.BOTTOM
+            }
             else -> {
                 throw IllegalArgumentException("Not Support gravity: ${gravityToString(gravity)}")
             }
