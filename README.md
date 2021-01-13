@@ -17,7 +17,7 @@
 # How to use
 
 ```kotlin
-Toasty.with("toasty").show()
+Toasty.with("Toasty").show()
 ```
 
 ## 更多配置
@@ -29,6 +29,8 @@ Toasty.with()
     .offsetY(0f)
     .duration(5000L)
     .replaceType(Toasty.REPLACE_NOW)
+    // .nativeToast()// 使用系统toast
+    // .message("文字Toast，优先级低于customView")
     .show()
 ```
 
@@ -39,9 +41,9 @@ Toasty.with()
 ```kotlin
     Toasty.init(
         application = this, toastyStrategy =
-        com.dede.toasty.DialogToastyStrategy()// 默认dialog实现
-//       com.dede.toasty.PopupWindowStrategy()
-//       com.dede.toasty.WindowManagerStrategy()
+        DialogToastyStrategy()// 默认dialog实现
+//       PopupWindowStrategy()
+//       WindowManagerStrategy()
         , viewFactory = ToastyViewFactory()// 默认的Toast布局
     )
 ```

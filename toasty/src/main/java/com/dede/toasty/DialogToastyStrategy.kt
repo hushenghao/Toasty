@@ -5,6 +5,9 @@ import android.app.Dialog
 import android.view.View
 import android.view.WindowManager
 
+/**
+ * Dialog实现
+ */
 class DialogToastyStrategy : Toasty.ToastyStrategy<Dialog> {
 
     override fun show(activity: Activity, view: View, builder: ToastyBuilder): Dialog {

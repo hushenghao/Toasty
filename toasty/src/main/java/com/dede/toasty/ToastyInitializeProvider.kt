@@ -6,6 +6,9 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
 
+/**
+ * Toasty自动初始化
+ */
 class ToastyInitializeProvider : ContentProvider() {
 
     override fun onCreate(): Boolean {

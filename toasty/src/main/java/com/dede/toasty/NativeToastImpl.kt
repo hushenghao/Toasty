@@ -4,6 +4,9 @@ import android.view.View
 import android.widget.Toast
 
 
+/**
+ * 原生Toast实现
+ */
 internal class NativeToastImpl {
 
     companion object {

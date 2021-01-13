@@ -5,7 +5,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow
 
-
+/**
+ * PopupWindow实现
+ */
 class PopupWindowStrategy : Toasty.ToastyStrategy<PopupWindow> {
 
     override fun show(activity: Activity, view: View, builder: ToastyBuilder): PopupWindow {

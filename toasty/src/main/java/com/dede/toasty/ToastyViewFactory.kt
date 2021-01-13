@@ -5,6 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
 
+/**
+ * ToastyView工厂
+ */
 class ToastyViewFactory : Toasty.ViewFactory {
 
     override fun createView(context: Context, builder: ToastyBuilder): View {

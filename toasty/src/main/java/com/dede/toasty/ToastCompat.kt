@@ -11,11 +11,14 @@ import androidx.annotation.StringRes
 /**
  * fix Android N 系统toast崩溃
  */
-internal object ToastCompat {
+object ToastCompat {
 
     private val isN =
         Build.VERSION.SDK_INT == Build.VERSION_CODES.N || Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1
 
+    /**
+     * fix 原生Toast
+     */
     fun wrapper(toast: Toast): Toast {
         if (isN) {
             try {

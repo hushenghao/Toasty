@@ -57,12 +57,6 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
                             return
                         }
                     }
-                    Toasty.DISCARD -> {
-                        if (toastEntry != null) {
-                            // 丢弃 不需要处理
-                            return
-                        }
-                    }
                     Toasty.REPLACE_BEHIND -> {
                         if (toastEntry != null) {
                             // 上面已经消费了toast, 重新放到队首
@@ -192,10 +186,21 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
     )
 
     fun show(builder: ToastyBuilder) {
-        if (builder.replaceType == Toasty.REPLACE_NOW) {
-            toastQueue.addFirst(builder)
-        } else {
-            toastQueue.add(builder)
+        when (builder.replaceType) {
+            Toasty.REPLACE_NOW -> {
+                toastQueue.addFirst(builder)
+            }
+            Toasty.DISCARD -> {
+                if (isShowing(currentAct)) {
+                    // 丢弃 不需要处理
+                    return
+                } else {
+                    toastQueue.add(builder)
+                }
+            }
+            Toasty.REPLACE_BEHIND -> {
+                toastQueue.add(builder)
+            }
         }
         sendShowMessage(currentAct, builder.showDelay)
     }

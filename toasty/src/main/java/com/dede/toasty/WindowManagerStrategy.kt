@@ -5,6 +5,9 @@ import android.graphics.PixelFormat
 import android.view.View
 import android.view.WindowManager
 
+/**
+ * WindowManager实现
+ */
 class WindowManagerStrategy : Toasty.ToastyStrategy<View> {
 
     override fun show(activity: Activity, view: View, builder: ToastyBuilder): View {

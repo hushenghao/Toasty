@@ -26,6 +26,13 @@ object Toasty {
     internal lateinit var toastyStrategy: ToastyStrategy<Any>
     internal val nativeToastImpl: NativeToastImpl = NativeToastImpl()
 
+    /**
+     * 初始化
+     *
+     * @param application Application
+     * @param viewFactory [ViewFactory]
+     * @param toastyStrategy [ToastyViewFactory]
+     */
     @JvmStatic
     @JvmOverloads
     fun init(
@@ -40,6 +47,10 @@ object Toasty {
         application.registerActivityLifecycleCallbacks(activityLifecycleCallback)
     }
 
+    /**
+     * 构建ToastyBuilder
+     * @param message 文字
+     */
     @JvmStatic
     @JvmOverloads
     fun with(message: CharSequence? = null): ToastyBuilder {
@@ -48,6 +59,10 @@ object Toasty {
         return toastBuilder
     }
 
+    /**
+     * 构建ToastyBuilder
+     * @param resId String资源
+     */
     @JvmStatic
     fun with(@StringRes resId: Int): ToastyBuilder {
         val toastyBuilder = ToastyBuilder()
@@ -60,10 +75,22 @@ object Toasty {
         return (applicationContext.resources.displayMetrics.density * dpFloat).roundToInt()
     }
 
+    /**
+     * ToastyView工厂
+     *
+     * @see ToastyViewFactory
+     */
     interface ViewFactory {
         fun createView(context: Context, builder: ToastyBuilder): View
     }
 
+    /**
+     * Toasty实现方式接口
+     *
+     * @see DialogToastyStrategy
+     * @see WindowManagerStrategy
+     * @see PopupWindowStrategy
+     */
     interface ToastyStrategy<T> {
         fun show(activity: Activity, view: View, builder: ToastyBuilder): T
         fun update(activity: Activity, view: View, builder: ToastyBuilder, old: T): T
