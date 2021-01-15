@@ -58,7 +58,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
                         }
                     }
                     Toasty.REPLACE_BEHIND -> {
-                        if (toastEntry != null) {
+                        if (isShowing(currentAct)) {
                             // 上面已经消费了toast, 重新放到队首
                             toastQueue.addFirst(toastBuilder)
                             return
