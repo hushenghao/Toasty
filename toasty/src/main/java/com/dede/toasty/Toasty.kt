@@ -9,12 +9,23 @@ import kotlin.math.roundToInt
 
 object Toasty {
 
+    /** 短时间显示, 2s */
     const val TOAST_SHORT = 2000L
+
+    /** 长时间显示, 3.5s */
     const val TOAST_LONG = 3500L
 
+    /** 如果已经有Toast在显示状态, 则立即替换正在显示的Toast */
     const val REPLACE_NOW = 1
+
+    /** 队列显示Toast, 默认的replaceType @see[ToastyBuilder.replaceType] */
     const val REPLACE_BEHIND = 2
+
+    /** 如果已经有Toast在显示状态, 则丢弃当前Toast */
     const val DISCARD = -1
+
+    // 默认的垂直方向的偏移量
+    const val DEFAULT_OFFSET_Y = 50f
 
     internal val activityLifecycleCallback = ActivityLifecycleCallback()
     internal val toastyHandler = ToastyHandler()

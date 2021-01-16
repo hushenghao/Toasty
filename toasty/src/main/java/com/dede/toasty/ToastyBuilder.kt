@@ -12,12 +12,21 @@ class ToastyBuilder {
         private const val TAG = "ToastyBuilder"
     }
 
-    internal var message: CharSequence? = null
-    internal var duration: Long = Toasty.TOAST_SHORT
-    internal var offsetYdp: Float = 50f
-    internal var gravity: Int = Gravity.BOTTOM
+    var message: CharSequence? = null
+        private set
+    var duration: Long = Toasty.TOAST_SHORT
+        private set
+    var offsetYdp: Float = Toasty.DEFAULT_OFFSET_Y
+        private set
+    val offsetYpx: Int get() = Toasty.dip(offsetYdp)
+    var offsetXdp: Float = 0f
+        private set
+    val offsetXpx: Int get() = Toasty.dip(offsetXdp)
+    var gravity: Int = Gravity.BOTTOM
+        private set
     internal var replaceType: Int = Toasty.REPLACE_BEHIND
-    internal var customView: View? = null
+    var customView: View? = null
+        private set
     internal var isNative: Boolean = false
 
     internal var showDelay = ToastyHandler.DEFAULT_SHOW_DELAY
@@ -59,27 +68,34 @@ class ToastyBuilder {
     }
 
     /**
+     * Toast水平方向的偏移量
+     */
+    fun offsetX(dp: Float): ToastyBuilder {
+        this.offsetXdp = dp
+        return this
+    }
+
+    /**
      * Toast显示位置
-     * @param gravity [Gravity.TOP], [Gravity.CENTER], [Gravity.BOTTOM]
+     * @param gravity
      */
     fun gravity(gravity: Int): ToastyBuilder {
         when (gravity) {
             Gravity.CENTER -> {
-                this.gravity = gravity
+                offsetXdp = 0f
+                offsetYdp = 0f
+                Log.i(TAG, "gravity: ${gravity.gravityToString()}, reset offset")
             }
-            Gravity.CENTER_VERTICAL, Gravity.TOP, Gravity.BOTTOM -> {
-                this.gravity = gravity or Gravity.CENTER_HORIZONTAL
+            Gravity.CENTER_VERTICAL -> {
+                offsetYdp = 0f
+                Log.i(TAG, "gravity: ${gravity.gravityToString()}, reset offsetY")
             }
-            Gravity.START -> {
-                this.gravity = Gravity.TOP
-            }
-            Gravity.END -> {
-                this.gravity = Gravity.BOTTOM
-            }
-            else -> {
-                throw IllegalArgumentException("Not Support gravity: ${gravityToString()}")
+            Gravity.CENTER_HORIZONTAL -> {
+                offsetXdp = 0f
+                Log.i(TAG, "gravity: ${gravity.gravityToString()}, reset offsetX")
             }
         }
+        this.gravity = gravity
         return this
     }
 
@@ -108,13 +124,13 @@ class ToastyBuilder {
      */
     fun customView(view: View): ToastyBuilder {
         this.customView = view
+        this.message = null
         return this
     }
 
-    fun offsetYpx(): Int {
-        return Toasty.dip(this.offsetYdp)
-    }
-
+    /**
+     * 使用原生Toast
+     */
     fun nativeToast(): ToastyBuilder {
         this.showDelay = 0L
         this.isNative = true
@@ -125,7 +141,7 @@ class ToastyBuilder {
      * 显示Toast
      */
     fun show() {
-        Log.i(TAG, "gravity: " + gravityToString())
+        Log.i(TAG, toString())
         Toasty.toastyHandler.show(this)
     }
 
@@ -140,9 +156,12 @@ class ToastyBuilder {
     override fun toString(): String {
         return "ToastyBuilder(" +
                 "message=$message, " +
-                "customView=$customView, " +
                 "duration=$duration, " +
-                "gravity=${gravityToString()}" +
+                "isNative=$isNative, " +
+                "offsetXdp=$offsetXdp, " +
+                "offsetYdp=$offsetYdp, " +
+                "gravity=${gravityToString()}, " +
+                "customView=$customView" +
                 ")"
     }
 

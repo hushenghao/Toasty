@@ -7,7 +7,7 @@ import com.dede.toasty.ToastyViewFactory
 
 class App : Application() {
 
-    private val customConfig = false
+    private val customConfig = true
 
     override fun onCreate() {
         super.onCreate()

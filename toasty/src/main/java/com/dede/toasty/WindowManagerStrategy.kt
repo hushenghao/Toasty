@@ -20,7 +20,8 @@ class WindowManagerStrategy : Toasty.ToastyStrategy<View> {
         params.gravity = builder.gravity
         params.width = WindowManager.LayoutParams.WRAP_CONTENT
         params.height = WindowManager.LayoutParams.WRAP_CONTENT
-        params.y = builder.offsetYpx()
+        params.y = builder.offsetYpx
+        params.x = builder.offsetXpx
         activity.windowManager.addView(view, params)
         return view
     }

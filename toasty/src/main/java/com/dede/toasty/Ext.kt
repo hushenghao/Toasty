@@ -49,7 +49,8 @@ internal fun ToastyBuilder.makeNativeToast(): Toast {
     return ToastCompat.makeText(Toasty.applicationContext, this.message, this.nativeDuration())
 }
 
-internal fun ToastyBuilder.gravityToString(): String {
+internal fun Int.gravityToString(): String {
+    val gravity = this
     val result = StringBuilder()
     if (gravity and Gravity.FILL == Gravity.FILL) {
         result.append("FILL").append(' ')
@@ -100,4 +101,8 @@ internal fun ToastyBuilder.gravityToString(): String {
     }
     result.deleteCharAt(result.length - 1)
     return result.toString()
+}
+
+internal fun ToastyBuilder.gravityToString(): String {
+    return this.gravity.gravityToString()
 }

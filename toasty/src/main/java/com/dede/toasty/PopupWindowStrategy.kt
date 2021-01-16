@@ -47,8 +47,8 @@ class PopupWindowStrategy : Toasty.ToastyStrategy<PopupWindow> {
         popupWindow.showAtLocation(
             parent,
             builder.gravity,
-            0,
-            builder.offsetYpx() + offset
+            builder.offsetXpx,
+            builder.offsetYpx + offset
         )
     }
 

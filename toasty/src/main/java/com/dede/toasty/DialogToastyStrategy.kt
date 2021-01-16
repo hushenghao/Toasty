@@ -21,7 +21,8 @@ class DialogToastyStrategy : Toasty.ToastyStrategy<Dialog> {
             )
             val params = it.attributes
             params.gravity = builder.gravity
-            params.y = builder.offsetYpx()
+            params.y = builder.offsetYpx
+            params.x = builder.offsetXpx
             it.attributes = params
         }
         dialog.show()
@@ -37,7 +38,8 @@ class DialogToastyStrategy : Toasty.ToastyStrategy<Dialog> {
         old.window?.let {
             val params = it.attributes
             params.gravity = builder.gravity
-            params.y = builder.offsetYpx()
+            params.y = builder.offsetYpx
+            params.x = builder.offsetXpx
             it.attributes = params
         }
         old.setContentView(view)
