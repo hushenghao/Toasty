@@ -18,7 +18,7 @@ internal class NativeToastImpl {
     fun showNative(builder: ToastyBuilder): Toast {
         val toast = builder.makeNativeToast()
         setCustomView(toast, builder.customView)
-        toast.setGravity(builder.gravity, 0, builder.offsetYpx)
+        toast.setGravity(builder.gravity, builder.offsetXpx, builder.offsetYpx)
         toast.show()
         return toast
     }
@@ -28,7 +28,7 @@ internal class NativeToastImpl {
         toast.duration = builder.nativeDuration()
         toast.setText(builder.message)
         setCustomView(toast, builder.customView)
-        toast.setGravity(builder.gravity, 0, builder.offsetYpx)
+        toast.setGravity(builder.gravity, builder.offsetXpx, builder.offsetYpx)
         toast.show()
         return toast
     }

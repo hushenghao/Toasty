@@ -12,19 +12,51 @@ class ToastyBuilder {
         private const val TAG = "ToastyBuilder"
     }
 
+    /**
+     * Toast message
+     */
     var message: CharSequence? = null
         private set
+
+    /**
+     * Toast 显示时长 ms
+     */
     var duration: Long = Toasty.TOAST_SHORT
         private set
+
+    /**
+     * Toast 垂直方向的偏移量 dp, 默认50dp
+     * @see [Toasty.DEFAULT_OFFSET_Y]
+     */
     var offsetYdp: Float = Toasty.DEFAULT_OFFSET_Y
         private set
+
+    /**
+     * Toast 垂直方向的偏移量 px
+     */
     val offsetYpx: Int get() = Toasty.dip(offsetYdp)
+
+    /**
+     * Toast 水平方向的偏移量 dp
+     */
     var offsetXdp: Float = 0f
         private set
+
+    /**
+     * Toast 水平方向的偏移量 px
+     */
     val offsetXpx: Int get() = Toasty.dip(offsetXdp)
+
+    /**
+     * Toast 显示时的gravity
+     */
     var gravity: Int = Gravity.BOTTOM
         private set
     internal var replaceType: Int = Toasty.REPLACE_BEHIND
+
+    /**
+     * Toast 自定义View
+     */
     var customView: View? = null
         private set
     internal var isNative: Boolean = false
