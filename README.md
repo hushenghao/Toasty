@@ -27,6 +27,7 @@ Toasty.with()
     .customView(view)
     .gravity(Gravity.CENTER)
     .offsetY(0f)
+    .offsetX(0f)
     .duration(5000L)
     .replaceType(Toasty.REPLACE_NOW)
     // .nativeToast()// 使用系统toast
@@ -36,7 +37,7 @@ Toasty.with()
 
 ## 自定义配置
 
-默认自动初始化，如果需要更多配置，需要在Application中初始化
+默认自动初始化，如果需要自定义配置，需要在Application中初始化
 
 ```kotlin
     Toasty.init(

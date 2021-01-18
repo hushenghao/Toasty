@@ -20,7 +20,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         private const val MSG_HIDE = 2
 
         // toast前的延迟, 防止toast显示后立刻关闭页面, 使toast显示两次
-        internal const val DEFAULT_SHOW_DELAY = 80L
+        internal const val DEFAULT_SHOW_DELAY = 100L
 
         // toast忽略重新显示的时长. 当已显示时间大于1s, 切换页面时就算没有显示完也不再重新显示
         private const val IGNORE_RESHOW_DURATION = 1000L
