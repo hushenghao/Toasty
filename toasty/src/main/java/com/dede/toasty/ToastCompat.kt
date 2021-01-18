@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.StringRes
 
@@ -12,6 +13,8 @@ import androidx.annotation.StringRes
  * fix Android N 系统toast崩溃
  */
 object ToastCompat {
+
+    private const val TAG = "ToastCompat"
 
     private val isN =
         Build.VERSION.SDK_INT == Build.VERSION_CODES.N || Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1
@@ -31,7 +34,7 @@ object ToastCompat {
                 val newHandler = SafeHandler(mHandler)
                 mHandlerField.set(mTN, newHandler)
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.w(TAG, "wrapper toast error: ", e)
             }
         }
         return toast
@@ -51,7 +54,7 @@ object ToastCompat {
             try {
                 base.handleMessage(msg)
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.w(TAG, "handler toast error: ", e)
             }
         }
     }

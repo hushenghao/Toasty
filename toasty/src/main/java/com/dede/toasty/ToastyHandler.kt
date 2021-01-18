@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.os.SystemClock
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import java.util.*
@@ -38,7 +39,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
     override fun handleMessage(msg: Message) {
         when (msg.what) {
             SHOW -> {
-                if (toastQueue.isEmpty()) {
+                if (!hasNext()) {
                     return
                 }
                 val toastBuilder = toastQueue.pop()// 消费当前toast
@@ -95,7 +96,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         try {
             Toasty.toastyStrategy.hide(attachAct, t)
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "hideToastInternal: ", e)
         }
 
         showNext()
@@ -117,7 +118,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
             val toastEntry = ToastEntry(builder, toastObj, attachAct, SystemClock.uptimeMillis())
             sendHideMessage(toastEntry, builder.duration)
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "showToastInternal: ", e)
         }
     }
 
@@ -140,23 +141,21 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
             val newEntry = ToastEntry(builder, toastObj, attachAct, SystemClock.uptimeMillis())
             sendHideMessage(newEntry, builder.duration)
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "updateToastInternal: ", e)
         }
     }
 
     private fun prepareToastView(builder: ToastyBuilder, attachAct: Activity): View {
-        val view = if (builder.customView != null) {
-            builder.customView!!
-        } else {
-            Toasty.viewFactory.createView(attachAct, builder)
-        }
+        val view = builder.customView ?: Toasty.viewFactory.createView(attachAct, builder)
         view.detachLayout()
         return view
     }
 
+    private fun hasNext(): Boolean = !toastQueue.isEmpty()
+
     private fun showNext() {
         showingToastEntry = null
-        if (toastQueue.isEmpty()) {
+        if (!hasNext()) {
             return
         }
         if (isShowing(currentAct)) {
@@ -178,7 +177,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         return activity.isFinishing || activity.isDestroyed
     }
 
-    class ToastEntry(
+    private class ToastEntry(
         val builder: ToastyBuilder,
         val toastObj: Any,
         val attachAct: Activity?,
@@ -193,6 +192,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
             Toasty.DISCARD -> {
                 if (isShowing(currentAct)) {
                     // 丢弃 不需要处理
+                    Log.i(TAG, "discard show: $builder")
                     return
                 } else {
                     toastQueue.add(builder)
@@ -236,8 +236,10 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         cancelShowMessage(activity)
         val toastEntry = showingToastEntry
         if (toastEntry != null) {
+            // Hide now. fix window leaked warn
+            // TODO fix WindowManagerStrategy window leaked
+            hideToastInternal(toastEntry)
             cancelHideMessage(toastEntry)
-            sendHideMessage(toastEntry)
         }
     }
 

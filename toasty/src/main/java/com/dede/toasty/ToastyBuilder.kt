@@ -186,6 +186,9 @@ class ToastyBuilder {
      * 显示Toast
      */
     fun show() {
+        if (!Toasty.isInitialized) {
+            throw IllegalStateException("Toasty没有正确初始化")
+        }
         Log.i(TAG, toString())
         Toasty.toastyHandler.show(this)
     }

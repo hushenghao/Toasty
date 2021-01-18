@@ -17,7 +17,7 @@ object Toasty {
     /** 如果已经有Toast在显示状态, 则立即替换正在显示的Toast */
     const val REPLACE_NOW = 1
 
-    /** 队列显示Toast, 默认的replaceType @see[ToastyBuilder.replaceType] */
+    /** 队列显示Toast, 默认的[ToastyBuilder.replaceType] */
     const val REPLACE_BEHIND = 2
 
     /** 如果已经有Toast在显示状态, 则丢弃当前Toast */
@@ -27,14 +27,20 @@ object Toasty {
     const val DEFAULT_OFFSET_Y = 50f
 
     internal val activityLifecycleCallback = ActivityLifecycleCallback()
-    internal val toastyHandler = ToastyHandler()
+    internal val toastyHandler = ToastyHandler()// Toasty调度Handler
 
     internal lateinit var applicationContext: Context
         private set
 
-    internal lateinit var viewFactory: ViewFactory
-    internal lateinit var toastyStrategy: ToastyStrategy<Any>
-    internal val nativeToastImpl: NativeToastImpl = NativeToastImpl()
+    internal lateinit var viewFactory: ViewFactory// Toasty View工厂
+    internal lateinit var toastyStrategy: ToastyStrategy<Any>// 当前Toasty实现
+
+    internal val nativeToastImpl: NativeToastImpl = NativeToastImpl()// 显示系统Toast
+
+    internal val isInitialized: Boolean
+        get() {
+            return Toasty::applicationContext.isInitialized
+        }
 
     /**
      * 初始化
@@ -88,11 +94,18 @@ object Toasty {
 
 
     /**
-     * ToastyView工厂
+     * 默认文字Toasty View工厂
      *
      * @see ToastyViewFactory 默认的Toasty布局
      */
     interface ViewFactory {
+
+        /**
+         * 创建默认文字Toast的View
+         *
+         * @param context 当前onStarted的Activity
+         * @param builder Toast的属性: 文字[ToastyBuilder.message]等
+         */
         fun createView(context: Context, builder: ToastyBuilder): View
     }
 
@@ -104,8 +117,46 @@ object Toasty {
      * @see WindowManagerStrategy 使用Activity的WindowManager, 不需要权限
      */
     interface ToastyStrategy<T> {
+
+        /**
+         * 显示Toast调用的方法
+         *
+         * @param activity 当前onStarted的Activity
+         * @param view Toast显示的View, 默认文字或者自定义View
+         * @param builder Toast的属性:
+         *  位置[ToastyBuilder.gravity],
+         *  时长[ToastyBuilder.duration],
+         *  偏移量[ToastyBuilder.offsetXpx],[ToastyBuilder.offsetYpx]等
+         * @return Toasty实现的对象, 用于更新或者隐藏Toast
+         * @see update
+         * @see hide
+         */
         fun show(activity: Activity, view: View, builder: ToastyBuilder): T
+
+        /**
+         * 更新Toast时调用的方法
+         *
+         * @param activity 当前onStarted的Activity
+         * @param view Toast显示的View, 默认文字或者自定义View
+         * @param builder Toast的属性:
+         *  位置[ToastyBuilder.gravity],
+         *  时长[ToastyBuilder.duration],
+         *  偏移量[ToastyBuilder.offsetXpx],[ToastyBuilder.offsetYpx]等
+         * @param old 需要更新的Toasty实现对象
+         * @return Toasty实现的对象, 可以根据实际情况进行复用
+         * @see show
+         * @see hide
+         */
         fun update(activity: Activity, view: View, builder: ToastyBuilder, old: T): T
+
+        /**
+         * 隐藏Toast时调用的方法
+         *
+         * @param activity 当前onStarted的Activity
+         * @param t Toasty实现的对象, 内容为[show]或[update]返回的对象
+         * @see show
+         * @see update
+         */
         fun hide(activity: Activity, t: T)
     }
 }
