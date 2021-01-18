@@ -1,3 +1,6 @@
+@file:JvmMultifileClass
+@file:JvmName("ToastCompat")
+
 package com.dede.toasty
 
 import android.content.Context
@@ -9,53 +12,67 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.StringRes
 
+
+private const val TAG = "ToastCompat"
+
+private val isN =
+    Build.VERSION.SDK_INT > Build.VERSION_CODES.M && Build.VERSION.SDK_INT < Build.VERSION_CODES.O
+
 /**
+ * 包装系统Toast
  * fix Android N 系统toast崩溃
  */
-object ToastCompat {
+fun Toast.wrapper(): Toast {
+    if (!isN) return this
 
-    private const val TAG = "ToastCompat"
-
-    private val isN =
-        Build.VERSION.SDK_INT == Build.VERSION_CODES.N || Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1
-
-    /**
-     * fix 原生Toast
-     */
-    fun wrapper(toast: Toast): Toast {
-        if (isN) {
-            try {
-                val mNTField = Toast::class.java.getDeclaredField("mTN")
-                mNTField.isAccessible = true
-                val mTN = mNTField.get(toast)
-                val mHandlerField = mTN.javaClass.getDeclaredField("mHandler")
-                mHandlerField.isAccessible = true
-                val mHandler = mHandlerField.get(mTN) as Handler
-                val newHandler = SafeHandler(mHandler)
-                mHandlerField.set(mTN, newHandler)
-            } catch (e: Exception) {
-                Log.w(TAG, "wrapper toast error: ", e)
-            }
+    try {
+        val mNTField = Toast::class.java.getDeclaredField("mTN")
+        mNTField.isAccessible = true
+        val mTN = mNTField.get(this)
+        val mHandlerField = mTN.javaClass.getDeclaredField("mHandler")
+        mHandlerField.isAccessible = true
+        val mHandler = mHandlerField.get(mTN) as Handler
+        if (mHandler !is SafeHandler) {
+            val newHandler = SafeHandler(mHandler)
+            mHandlerField.set(mTN, newHandler)
         }
-        return toast
+    } catch (e: Exception) {
+        Log.w(TAG, "wrapper toast error: ", e)
     }
+    return this
+}
 
-    fun makeText(context: Context, text: CharSequence?, duration: Int): Toast {
-        return wrapper(Toast.makeText(context, text, duration))
-    }
+/**
+ * 安全显示Toast
+ */
+fun Toast.safeShow() {
+    this.wrapper().show()
+}
 
-    fun makeText(context: Context, @StringRes resId: Int, duration: Int): Toast {
-        return wrapper(Toast.makeText(context, resId, duration))
-    }
+private class SafeHandler(private val base: Handler) : Handler(Looper.getMainLooper(), null) {
 
-    private class SafeHandler(val base: Handler) : Handler(Looper.getMainLooper(), null) {
-
-        override fun handleMessage(msg: Message) {
-            try {
-                base.handleMessage(msg)
-            } catch (e: Exception) {
-                Log.w(TAG, "handler toast error: ", e)
-            }
+    override fun handleMessage(msg: Message) {
+        try {
+            base.handleMessage(msg)
+        } catch (e: Exception) {
+            Log.w(TAG, "handler toast error: ", e)
         }
     }
+}
+
+
+/**
+ * make Toast
+ * @see Toast.makeText
+ */
+fun makeText(context: Context, text: CharSequence?, duration: Int): Toast {
+    return Toast.makeText(context, text, duration).wrapper()
+}
+
+/**
+ * make Toast
+ * @see Toast.makeText
+ */
+fun makeText(context: Context, @StringRes resId: Int, duration: Int): Toast {
+    return Toast.makeText(context, resId, duration).wrapper()
 }

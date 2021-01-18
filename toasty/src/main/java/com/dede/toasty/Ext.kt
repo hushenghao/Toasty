@@ -1,6 +1,5 @@
 package com.dede.toasty
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.res.Resources
@@ -61,9 +60,8 @@ internal fun ToastyBuilder.nativeDurationMillis(): Long {
     return if (this.duration == Toasty.TOAST_LONG) NativeToastImpl.LONG_MILLIS else NativeToastImpl.SHORT_MILLIS
 }
 
-@SuppressLint("ShowToast")
 internal fun ToastyBuilder.makeNativeToast(): Toast {
-    return ToastCompat.makeText(Toasty.applicationContext, this.message, this.nativeDuration())
+    return makeText(Toasty.applicationContext, this.message, this.nativeDuration())
 }
 
 internal fun Int.gravityToString(): String {
