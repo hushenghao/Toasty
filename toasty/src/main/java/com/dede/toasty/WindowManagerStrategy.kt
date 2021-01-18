@@ -6,13 +6,13 @@ import android.view.View
 import android.view.WindowManager
 
 /**
- * WindowManager实现
+ * Activity的WindowManager实现
  */
-class WindowManagerStrategy : Toasty.ToastyStrategy<View> {
+open class WindowManagerStrategy : Toasty.ToastyStrategy<View> {
 
     override fun show(activity: Activity, view: View, builder: ToastyBuilder): View {
         val params = WindowManager.LayoutParams()
-        params.type = WindowManager.LayoutParams.TYPE_APPLICATION
+        params.type = getWindowType()
         params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -22,7 +22,7 @@ class WindowManagerStrategy : Toasty.ToastyStrategy<View> {
         params.height = WindowManager.LayoutParams.WRAP_CONTENT
         params.y = builder.offsetYpx
         params.x = builder.offsetXpx
-        activity.windowManager.addView(view, params)
+        getWindowManager(activity).addView(view, params)
         return view
     }
 
@@ -33,6 +33,21 @@ class WindowManagerStrategy : Toasty.ToastyStrategy<View> {
     }
 
     override fun hide(activity: Activity, t: View) {
-        activity.windowManager.removeView(t)
+        getWindowManager(activity).removeView(t)
+    }
+
+    /**
+     * 获取WindowManager显示View的type
+     * @see WindowManager.LayoutParams.type
+     */
+    open fun getWindowType(): Int {
+        return WindowManager.LayoutParams.TYPE_APPLICATION
+    }
+
+    /**
+     * 获取WindowManager对象
+     */
+    open fun getWindowManager(activity: Activity): WindowManager {
+        return activity.windowManager
     }
 }

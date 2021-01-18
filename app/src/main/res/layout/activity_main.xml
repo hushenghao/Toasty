@@ -55,4 +55,10 @@
         android:onClick="customNative"
         android:text="自定义NATIVE" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="clear"
+        android:text="clear" />
+
 </LinearLayout>

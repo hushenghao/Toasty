@@ -4,7 +4,15 @@ import android.app.Activity
 import android.app.Application
 import android.os.Bundle
 
-internal class ActivityLifecycleCallback : Application.ActivityLifecycleCallbacks {
+/**
+ * 全局Activity生命周期监听
+ */
+internal class GlobalActivityLifecycleObserver : Application.ActivityLifecycleCallbacks {
+
+    fun register(application: Application) {
+        application.unregisterActivityLifecycleCallbacks(this)
+        application.registerActivityLifecycleCallbacks(this)
+    }
 
     interface LifecycleListener {
         fun onCreate(activity: Activity)
@@ -14,6 +22,7 @@ internal class ActivityLifecycleCallback : Application.ActivityLifecycleCallback
     }
 
     var lifecycleCallback: LifecycleListener? = null
+        internal set
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         lifecycleCallback?.onCreate(activity)

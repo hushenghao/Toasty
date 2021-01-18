@@ -26,9 +26,9 @@ class ToastyBuilder {
 
     /**
      * Toast 垂直方向的偏移量 dp, 默认50dp
-     * @see [Toasty.DEFAULT_OFFSET_Y]
+     * @see [Toasty.DEFAULT_OFFSET_Y_DIP]
      */
-    var offsetYdp: Float = Toasty.DEFAULT_OFFSET_Y
+    var offsetYdp: Float = Toasty.DEFAULT_OFFSET_Y_DIP
         private set
 
     /**

@@ -24,9 +24,9 @@ object Toasty {
     const val DISCARD = -1
 
     // 默认的垂直方向的偏移量
-    const val DEFAULT_OFFSET_Y = 50f
+    const val DEFAULT_OFFSET_Y_DIP = 50f
 
-    internal val activityLifecycleCallback = ActivityLifecycleCallback()
+    internal val activityLifecycleObserver = GlobalActivityLifecycleObserver()
     internal val toastyHandler = ToastyHandler()// Toasty调度Handler
 
     internal lateinit var applicationContext: Context
@@ -65,8 +65,7 @@ object Toasty {
         applicationContext = application.applicationContext
         Toasty.viewFactory = viewFactory
         Toasty.toastyStrategy = toastyStrategy as ToastyStrategy<Any>
-        application.unregisterActivityLifecycleCallbacks(activityLifecycleCallback)
-        application.registerActivityLifecycleCallbacks(activityLifecycleCallback)
+        activityLifecycleObserver.register(application)
     }
 
     /**
@@ -90,6 +89,13 @@ object Toasty {
         val toastyBuilder = ToastyBuilder()
         toastyBuilder.message(resId)
         return toastyBuilder
+    }
+
+    /**
+     * 取消当前显示的Toast, 并清空Toast队列
+     */
+    fun clear() {
+        toastyHandler.clear()
     }
 
 

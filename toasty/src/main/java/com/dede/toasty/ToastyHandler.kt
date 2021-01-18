@@ -11,13 +11,13 @@ import android.widget.Toast
 import java.util.*
 
 internal class ToastyHandler : Handler(Looper.getMainLooper()),
-    ActivityLifecycleCallback.LifecycleListener {
+    GlobalActivityLifecycleObserver.LifecycleListener {
 
     companion object {
         private const val TAG = "ToastyHandler"
 
-        private const val SHOW = 1
-        private const val HIDE = 2
+        private const val MSG_SHOW = 1
+        private const val MSG_HIDE = 2
 
         // toast前的延迟, 防止toast显示后立刻关闭页面, 使toast显示两次
         internal const val DEFAULT_SHOW_DELAY = 80L
@@ -26,19 +26,23 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         private const val IGNORE_RESHOW_DURATION = 1000L
     }
 
+    // 待显示的Toast队列
     private val toastQueue = LinkedList<ToastyBuilder>()
 
     // 当前显示的Toast
     private var showingToastEntry: ToastEntry? = null
+
+    // 当前处于前台的Activity
     private var currentAct: Activity? = null
 
     init {
-        Toasty.activityLifecycleCallback.lifecycleCallback = this
+        // 注册Activity生命周期监听
+        Toasty.activityLifecycleObserver.lifecycleCallback = this
     }
 
     override fun handleMessage(msg: Message) {
         when (msg.what) {
-            SHOW -> {
+            MSG_SHOW -> {
                 if (!hasNext()) {
                     return
                 }
@@ -52,7 +56,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
                                 updateToastInternal(toastBuilder, toastEntry)
                             } else {
                                 // 先隐藏再显示
-                                hideToastInternal(toastEntry)
+                                hideToastInternal(toastEntry, false)
                                 showToastInternal(toastBuilder)
                             }
                             return
@@ -68,14 +72,17 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
                 }
                 showToastInternal(toastBuilder)
             }
-            HIDE -> {
+            MSG_HIDE -> {
                 val entry = msg.obj as ToastEntry
-                hideToastInternal(entry)
+                hideToastInternal(entry, true)
             }
         }
     }
 
-    private fun hideToastInternal(entry: ToastEntry) {
+    /**
+     * 隐藏Toast
+     */
+    private fun hideToastInternal(entry: ToastEntry, reshow: Boolean) {
         val attachAct = entry.attachAct
         if (attachAct == null || entry.builder.isNative) {
             Toasty.nativeToastImpl.hideNative(entry.toastObj as? Toast)
@@ -85,7 +92,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         }
 
         val surplus = SystemClock.uptimeMillis() - entry.showWhen
-        if (surplus < IGNORE_RESHOW_DURATION && surplus < entry.builder.duration) {
+        if (reshow && surplus < IGNORE_RESHOW_DURATION && surplus < entry.builder.duration) {
             // 没有显示完，更新显示时间重新显示
             entry.builder.duration(surplus)
             toastQueue.remove(entry.builder)
@@ -99,12 +106,16 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
             Log.e(TAG, "hideToastInternal: ", e)
         }
 
+        // 显示下一个Toast
         showNext()
     }
 
+    /**
+     * 显示Toast
+     */
     private fun showToastInternal(builder: ToastyBuilder) {
         val attachAct = this.currentAct
-        if (builder.isNative || attachAct == null || isFinish(attachAct)) {
+        if (builder.isNative || attachAct == null || attachAct.isFinished()) {
             val toast = Toasty.nativeToastImpl.showNative(builder)
             val newEntry = ToastEntry(builder, toast, attachAct, -1)
             sendHideMessage(newEntry, builder.nativeDurationMillis())
@@ -122,11 +133,14 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         }
     }
 
+    /**
+     * 更新Toast
+     */
     private fun updateToastInternal(builder: ToastyBuilder, toastEntry: ToastEntry) {
         cancelHideMessage(toastEntry)
 
         val attachAct = this.currentAct
-        if (builder.isNative || attachAct == null || isFinish(attachAct)) {
+        if (builder.isNative || attachAct == null || attachAct.isFinished()) {
             val toast = Toasty.nativeToastImpl.updateNative(builder, toastEntry.toastObj as? Toast)
             val newEntry = ToastEntry(builder, toast, attachAct, -1)
             sendHideMessage(newEntry, builder.nativeDurationMillis())
@@ -145,6 +159,9 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         }
     }
 
+    /**
+     * 准备Toast View
+     */
     private fun prepareToastView(builder: ToastyBuilder, attachAct: Activity): View {
         val view = builder.customView ?: Toasty.viewFactory.createView(attachAct, builder)
         view.detachLayout()
@@ -153,6 +170,9 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
 
     private fun hasNext(): Boolean = !toastQueue.isEmpty()
 
+    /**
+     * 显示下一个Toast
+     */
     private fun showNext() {
         showingToastEntry = null
         if (!hasNext()) {
@@ -164,26 +184,37 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         sendShowMessage(currentAct)
     }
 
+    /**
+     * 当前Activity是否在显示中
+     */
     private fun isShowing(activity: Activity?): Boolean {
-        if (hasMessages(SHOW, activity)) {
+        if (hasMessages(MSG_SHOW, activity)) {
             return true
         }
         return showingToastEntry != null
     }
 
-    private fun isFinish(activity: Activity?): Boolean {
-        if (activity == null) return true
-
-        return activity.isFinishing || activity.isDestroyed
-    }
-
+    /**
+     * Toast事务Entry
+     * @see showingToastEntry
+     */
     private class ToastEntry(
+        /** Toast属性 */
         val builder: ToastyBuilder,
+        /**
+         * Toast实现对象, 用于隐藏,更新Toast
+         * @see Toasty.toastyStrategy
+         */
         val toastObj: Any,
+        /** Toast依附的Activity对象 */
         val attachAct: Activity?,
+        /** 显示时的时间 */
         val showWhen: Long
     )
 
+    /**
+     * 显示Toast
+     */
     fun show(builder: ToastyBuilder) {
         when (builder.replaceType) {
             Toasty.REPLACE_NOW -> {
@@ -205,8 +236,23 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         sendShowMessage(currentAct, builder.showDelay)
     }
 
+    /**
+     * 取消当前显示的Toast, 并清空Toast队列
+     */
+    fun clear() {
+        toastQueue.clear()
+
+        cancelShowMessage(this.currentAct)
+        val toastEntry = showingToastEntry
+        if (toastEntry != null) {
+            hideNow(toastEntry, false)
+        }
+    }
+
+    /** [GlobalActivityLifecycleObserver.lifecycleCallback] */
+
     override fun onCreate(activity: Activity) {
-        showWithLifecycle(activity)
+        // showWithLifecycle(activity)
     }
 
     override fun onStart(activity: Activity) {
@@ -221,6 +267,12 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         hideWithLifecycle(activity)
     }
 
+    /**
+     * Activity生命周期变化触发的显示Toast
+     *
+     * @param activity 当前Activity
+     * @see onStart
+     */
     private fun showWithLifecycle(activity: Activity) {
         currentAct = activity
         if (isShowing(activity)) {
@@ -229,36 +281,47 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         showNext()
     }
 
+    /**
+     * Activity生命周期变化触发的隐藏Toast
+     *
+     * @param activity 当前Activity
+     * @see onStop
+     * @see onDestroy
+     */
     private fun hideWithLifecycle(activity: Activity) {
         if (activity == currentAct) {
             currentAct = null
         }
         cancelShowMessage(activity)
         val toastEntry = showingToastEntry
-        if (toastEntry != null) {
-            // Hide now. fix window leaked warn
-            // TODO fix WindowManagerStrategy window leaked
-            hideToastInternal(toastEntry)
-            cancelHideMessage(toastEntry)
+        if (toastEntry != null && toastEntry.attachAct == activity) {
+            hideNow(toastEntry, true)
         }
     }
 
+    private fun hideNow(toastEntry: ToastEntry, reshow: Boolean) {
+        // Hide now. fix window leaked warn
+        // TODO fix WindowManagerStrategy window leaked
+        hideToastInternal(toastEntry, reshow)
+        cancelHideMessage(toastEntry)
+    }
+
     private fun cancelShowMessage(obj: Activity?) {
-        removeMessages(SHOW, obj)
+        removeMessages(MSG_SHOW, obj)
     }
 
     private fun sendShowMessage(obj: Activity?, delayMillis: Long = 0L) {
-        val message = Message.obtain(this, SHOW, obj)
+        val message = Message.obtain(this, MSG_SHOW, obj)
         sendMessageDelayed(message, delayMillis)
     }
 
     private fun cancelHideMessage(obj: ToastEntry) {
-        removeMessages(HIDE, obj)
+        removeMessages(MSG_HIDE, obj)
     }
 
     private fun sendHideMessage(obj: ToastEntry, delayMillis: Long = 0L) {
         showingToastEntry = obj
-        val message = Message.obtain(this, HIDE, obj)
+        val message = Message.obtain(this, MSG_HIDE, obj)
         sendMessageDelayed(message, delayMillis)
     }
 }

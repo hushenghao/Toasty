@@ -82,4 +82,8 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    fun clear(view: View) {
+        Toasty.clear()
+    }
+
 }

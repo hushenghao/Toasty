@@ -1,6 +1,7 @@
 package com.dede.toasty
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.res.Resources
 import android.view.*
@@ -41,6 +42,10 @@ internal fun Float.dip(): Int {
     return (Toasty.applicationContext.resources.displayMetrics.density * this).roundToInt()
 }
 
+internal fun Activity?.isFinished(): Boolean {
+    if (this == null) return true
+    return this.isFinishing || this.isDestroyed
+}
 
 /**
  * 转换为原生Toast的duration
