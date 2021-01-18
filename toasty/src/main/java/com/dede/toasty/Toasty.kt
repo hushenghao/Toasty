@@ -5,7 +5,6 @@ import android.app.Application
 import android.content.Context
 import android.view.View
 import androidx.annotation.StringRes
-import kotlin.math.roundToInt
 
 object Toasty {
 
@@ -42,7 +41,13 @@ object Toasty {
      *
      * @param application Application
      * @param viewFactory [ViewFactory]
-     * @param toastyStrategy [ToastyViewFactory]
+     * @param toastyStrategy [ToastyStrategy]
+     *
+     * @see ToastyViewFactory 默认的Toasty布局
+     *
+     * @see DialogToastyStrategy Dialog实现
+     * @see PopupWindowStrategy PopupWindow实现
+     * @see WindowManagerStrategy 使用Activity的WindowManager, 不需要权限
      */
     @JvmStatic
     @JvmOverloads
@@ -81,15 +86,11 @@ object Toasty {
         return toastyBuilder
     }
 
-    internal fun dip(dp: Number): Int {
-        val dpFloat = dp.toFloat()
-        return (applicationContext.resources.displayMetrics.density * dpFloat).roundToInt()
-    }
 
     /**
      * ToastyView工厂
      *
-     * @see ToastyViewFactory
+     * @see ToastyViewFactory 默认的Toasty布局
      */
     interface ViewFactory {
         fun createView(context: Context, builder: ToastyBuilder): View
@@ -98,9 +99,9 @@ object Toasty {
     /**
      * Toasty实现方式接口
      *
-     * @see DialogToastyStrategy
-     * @see WindowManagerStrategy
-     * @see PopupWindowStrategy
+     * @see DialogToastyStrategy Dialog实现
+     * @see PopupWindowStrategy PopupWindow实现
+     * @see WindowManagerStrategy 使用Activity的WindowManager, 不需要权限
      */
     interface ToastyStrategy<T> {
         fun show(activity: Activity, view: View, builder: ToastyBuilder): T

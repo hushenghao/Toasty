@@ -43,7 +43,6 @@ class MainActivity : AppCompatActivity() {
         Toasty.with()
             .customView(inflate)
             .gravity(Gravity.CENTER)
-            .offsetY(0f)
             .duration(5000L)
             .show()
     }
@@ -71,6 +70,16 @@ class MainActivity : AppCompatActivity() {
 
     fun _native(view: View) {
         Toasty.with("原生Toast").nativeToast().show()
+    }
+
+    fun customNative(view: View) {
+        val inflate = layoutInflater.inflate(R.layout.layout_custom_toast, null, false)
+        Toasty.with()
+            .customView(inflate)
+            .gravity(Gravity.CENTER)
+            .duration(Toasty.TOAST_LONG)
+            .nativeToast()
+            .show()
     }
 
 }

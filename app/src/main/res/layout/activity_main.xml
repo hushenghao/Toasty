@@ -47,6 +47,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="_native"
-        android:text="NATVIVE" />
+        android:text="NATIVE" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="customNative"
+        android:text="自定义NATIVE" />
 
 </LinearLayout>

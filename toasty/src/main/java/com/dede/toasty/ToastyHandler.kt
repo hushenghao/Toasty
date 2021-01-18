@@ -106,7 +106,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         if (builder.isNative || attachAct == null || isFinish(attachAct)) {
             val toast = Toasty.nativeToastImpl.showNative(builder)
             val newEntry = ToastEntry(builder, toast, attachAct, -1)
-            sendHideMessage(newEntry, builder.nativeDelay())
+            sendHideMessage(newEntry, builder.nativeDurationMillis())
             return
         }
 
@@ -128,7 +128,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         if (builder.isNative || attachAct == null || isFinish(attachAct)) {
             val toast = Toasty.nativeToastImpl.updateNative(builder, toastEntry.toastObj as? Toast)
             val newEntry = ToastEntry(builder, toast, attachAct, -1)
-            sendHideMessage(newEntry, builder.nativeDelay())
+            sendHideMessage(newEntry, builder.nativeDurationMillis())
             return
         }
 

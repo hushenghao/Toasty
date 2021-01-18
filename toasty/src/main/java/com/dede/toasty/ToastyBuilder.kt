@@ -34,7 +34,7 @@ class ToastyBuilder {
     /**
      * Toast 垂直方向的偏移量 px
      */
-    val offsetYpx: Int get() = Toasty.dip(offsetYdp)
+    val offsetYpx: Int get() = offsetYdp.dip()
 
     /**
      * Toast 水平方向的偏移量 dp
@@ -45,7 +45,7 @@ class ToastyBuilder {
     /**
      * Toast 水平方向的偏移量 px
      */
-    val offsetXpx: Int get() = Toasty.dip(offsetXdp)
+    val offsetXpx: Int get() = offsetXdp.dip()
 
     /**
      * Toast 显示时的gravity
@@ -85,7 +85,7 @@ class ToastyBuilder {
      * Toast显示时长
      * @param duration 单位ms [Toasty.TOAST_SHORT], [Toasty.TOAST_LONG]
      */
-    fun duration(@IntRange(from = 0) duration: Long): ToastyBuilder {
+    fun duration(@IntRange(from = 0L) duration: Long): ToastyBuilder {
         this.duration = duration
         return this
     }
@@ -101,6 +101,7 @@ class ToastyBuilder {
 
     /**
      * Toast水平方向的偏移量
+     * @param dp 单位dp
      */
     fun offsetX(dp: Float): ToastyBuilder {
         this.offsetXdp = dp
@@ -108,8 +109,20 @@ class ToastyBuilder {
     }
 
     /**
+     * Toast偏移量
+     * @param offsetXdp 水平方向的偏移量
+     * @param offsetYdp 垂直方向的偏移量
+     */
+    fun offset(offsetXdp: Float, offsetYdp: Float): ToastyBuilder {
+        this.offsetXdp = offsetXdp
+        this.offsetYdp = offsetYdp
+        return this
+    }
+
+    /**
      * Toast显示位置
      * @param gravity
+     * @see [Gravity]
      */
     fun gravity(gravity: Int): ToastyBuilder {
         when (gravity) {
@@ -192,7 +205,7 @@ class ToastyBuilder {
                 "isNative=$isNative, " +
                 "offsetXdp=$offsetXdp, " +
                 "offsetYdp=$offsetYdp, " +
-                "gravity=${gravityToString()}, " +
+                "gravity=${gravity.gravityToString()}, " +
                 "customView=$customView" +
                 ")"
     }

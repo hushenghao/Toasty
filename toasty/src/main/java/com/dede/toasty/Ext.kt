@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.res.Resources
 import android.view.*
 import android.widget.Toast
+import kotlin.math.roundToInt
 
 
 internal fun Context.getNavigationBarHeight(): Int {
@@ -36,12 +37,23 @@ internal fun View.detachLayout() {
 }
 
 
+internal fun Float.dip(): Int {
+    return (Toasty.applicationContext.resources.displayMetrics.density * this).roundToInt()
+}
+
+
+/**
+ * 转换为原生Toast的duration
+ */
 internal fun ToastyBuilder.nativeDuration(): Int {
     return if (this.duration == Toasty.TOAST_LONG) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
 }
 
-internal fun ToastyBuilder.nativeDelay(): Long {
-    return if (this.duration == Toasty.TOAST_LONG) NativeToastImpl.LONG_DELAY else NativeToastImpl.SHORT_DELAY
+/**
+ * 转换为原生Toast的显示时长
+ */
+internal fun ToastyBuilder.nativeDurationMillis(): Long {
+    return if (this.duration == Toasty.TOAST_LONG) NativeToastImpl.LONG_MILLIS else NativeToastImpl.SHORT_MILLIS
 }
 
 @SuppressLint("ShowToast")
@@ -101,8 +113,4 @@ internal fun Int.gravityToString(): String {
     }
     result.deleteCharAt(result.length - 1)
     return result.toString()
-}
-
-internal fun ToastyBuilder.gravityToString(): String {
-    return this.gravity.gravityToString()
 }
