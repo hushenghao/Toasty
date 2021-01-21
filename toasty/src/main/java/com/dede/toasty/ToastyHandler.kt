@@ -295,13 +295,13 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         cancelShowMessage(activity)
         val toastEntry = showingToastEntry
         if (toastEntry != null && toastEntry.attachAct == activity) {
+            // TODO fix WindowManagerStrategy window leaked
             hideNow(toastEntry, true)
         }
     }
 
+    // Hide now. fix window leaked warn
     private fun hideNow(toastEntry: ToastEntry, reshow: Boolean) {
-        // Hide now. fix window leaked warn
-        // TODO fix WindowManagerStrategy window leaked
         hideToastInternal(toastEntry, reshow)
         cancelHideMessage(toastEntry)
     }

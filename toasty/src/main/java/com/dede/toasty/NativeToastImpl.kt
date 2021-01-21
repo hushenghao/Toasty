@@ -13,11 +13,17 @@ internal class NativeToastImpl {
         // 系统toast显示时长
         const val SHORT_MILLIS = 2000L
         const val LONG_MILLIS = 3500L
+
+        private fun Toast.setToastView(view: View?) {
+            if (view == null) return
+            view.detachLayout()
+            this.view = view
+        }
     }
 
     fun showNative(builder: ToastyBuilder): Toast {
         val toast = builder.makeNativeToast()
-        setCustomView(toast, builder.customView)
+        toast.setToastView(builder.customView)
         toast.setGravity(builder.gravity, builder.offsetXpx, builder.offsetYpx)
         toast.show()
         return toast
@@ -27,16 +33,10 @@ internal class NativeToastImpl {
         val toast = old ?: builder.makeNativeToast()
         toast.duration = builder.nativeDuration()
         toast.setText(builder.message)
-        setCustomView(toast, builder.customView)
+        toast.setToastView(builder.customView)
         toast.setGravity(builder.gravity, builder.offsetXpx, builder.offsetYpx)
         toast.show()
         return toast
-    }
-
-    private fun setCustomView(toast: Toast, customView: View?) {
-        if (customView == null) return
-        customView.detachLayout()
-        toast.view = customView
     }
 
     fun hideNative(toast: Toast?) {

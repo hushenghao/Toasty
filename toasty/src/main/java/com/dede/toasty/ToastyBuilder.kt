@@ -194,7 +194,7 @@ class ToastyBuilder {
     }
 
     /**
-     * 立即显示Toast，忽略显示钱默认的等待时间
+     * 立即显示Toast，忽略显示前默认的等待时间
      */
     fun showNow() {
         showDelay = 0L
