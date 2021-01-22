@@ -91,12 +91,15 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
             return
         }
 
-        val surplus = SystemClock.uptimeMillis() - entry.showWhen
-        if (reshow && surplus < IGNORE_RESHOW_DURATION && surplus < entry.builder.duration) {
-            // 没有显示完，更新显示时间重新显示
-            entry.builder.duration(surplus)
-            toastQueue.remove(entry.builder)
-            toastQueue.addFirst(entry.builder)
+        val needReshow = reshow && entry.builder.reshow
+        if (needReshow) {
+            val surplus = SystemClock.uptimeMillis() - entry.showWhen
+            if (surplus < IGNORE_RESHOW_DURATION && surplus < entry.builder.duration) {
+                // 没有显示完，更新显示时间重新显示
+                entry.builder.duration(surplus)
+                toastQueue.remove(entry.builder)
+                toastQueue.addFirst(entry.builder)
+            }
         }
 
         val t = entry.toastObj
