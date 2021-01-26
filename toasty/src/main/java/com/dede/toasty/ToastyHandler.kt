@@ -256,11 +256,18 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
     }
 
     override fun onStart(activity: Activity) {
+    }
+
+    override fun onResume(activity: Activity) {
+        // fix 关闭透明Activity时，底部Activity不onStart，使事件处理暂时停止问题
         showWithLifecycle(activity)
     }
 
-    override fun onStop(activity: Activity) {
+    override fun onPause(activity: Activity) {
         hideWithLifecycle(activity)
+    }
+
+    override fun onStop(activity: Activity) {
     }
 
     override fun onDestroy(activity: Activity) {

@@ -17,6 +17,8 @@ internal class GlobalActivityLifecycleObserver : Application.ActivityLifecycleCa
     interface LifecycleListener {
         fun onCreate(activity: Activity)
         fun onStart(activity: Activity)
+        fun onResume(activity: Activity)
+        fun onPause(activity: Activity)
         fun onStop(activity: Activity)
         fun onDestroy(activity: Activity)
     }
@@ -33,9 +35,11 @@ internal class GlobalActivityLifecycleObserver : Application.ActivityLifecycleCa
     }
 
     override fun onActivityResumed(activity: Activity) {
+        lifecycleCallback?.onResume(activity)
     }
 
     override fun onActivityPaused(activity: Activity) {
+        lifecycleCallback?.onPause(activity)
     }
 
     override fun onActivityStopped(activity: Activity) {
