@@ -63,6 +63,17 @@ class ToastyBuilder {
 
     internal var showDelay = ToastyHandler.DEFAULT_SHOW_DELAY
 
+    internal var reshow = true
+
+    /**
+     * Toast未显示结束时页面切换是否重新显示
+     * @param reshow true 重新显示, 默认值
+     */
+    fun reshow(reshow: Boolean): ToastyBuilder {
+        this.reshow = reshow
+        return this
+    }
+
     /**
      * Toast文案
      * @param message 文字
@@ -210,6 +221,7 @@ class ToastyBuilder {
                 "offsetYdp=$offsetYdp, " +
                 "gravity=${gravity.gravityToString()}, " +
                 "customView=$customView" +
+                "reshow=$reshow" +
                 ")"
     }
 

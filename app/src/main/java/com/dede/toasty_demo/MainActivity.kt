@@ -2,6 +2,7 @@ package com.dede.toasty_demo
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
 import android.view.Gravity
 import android.view.View
@@ -84,6 +85,18 @@ class MainActivity : AppCompatActivity() {
 
     fun clear(view: View) {
         Toasty.clear()
+    }
+
+    private var time = 0L
+
+    override fun onBackPressed() {
+        val uptimeMillis = SystemClock.uptimeMillis()
+        if (uptimeMillis - time > 1000) {
+            time = uptimeMillis
+            Toasty.with("再按一次退出").reshow(false).showNow()
+        } else {
+            super.onBackPressed()
+        }
     }
 
 }
