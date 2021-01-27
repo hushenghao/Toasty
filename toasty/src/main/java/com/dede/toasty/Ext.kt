@@ -42,7 +42,8 @@ internal fun Float.dip(): Int {
 }
 
 internal fun Activity?.isFinished(): Boolean {
-    if (this == null) return true
+//    return false
+    if (this == null) return false
     return this.isFinishing || this.isDestroyed
 }
 

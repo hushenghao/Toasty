@@ -26,6 +26,16 @@ class MainActivity : AppCompatActivity() {
         Log.i(TAG, "onStart: ")
     }
 
+    override fun onResume() {
+        super.onResume()
+        Log.i(TAG, "onResume: ")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.i(TAG, "onPause: ")
+    }
+
     override fun onStop() {
         super.onStop()
         Log.i(TAG, "onStop: ")
@@ -93,7 +103,10 @@ class MainActivity : AppCompatActivity() {
         val uptimeMillis = SystemClock.uptimeMillis()
         if (uptimeMillis - time > 1000) {
             time = uptimeMillis
-            Toasty.with("再按一次退出").reshow(false).showNow()
+            Toasty.with("再按一次退出")
+                .replaceType(Toasty.REPLACE_NOW)
+                .reshow(false)
+                .showNow()
         } else {
             super.onBackPressed()
         }

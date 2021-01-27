@@ -23,6 +23,16 @@ class SecondActivity : AppCompatActivity() {
         Log.i(TAG, "onStart: ")
     }
 
+    override fun onResume() {
+        super.onResume()
+        Log.i(TAG, "onResume: ")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.i(TAG, "onPause: ")
+    }
+
     override fun onStop() {
         super.onStop()
         Log.i(TAG, "onStop: ")

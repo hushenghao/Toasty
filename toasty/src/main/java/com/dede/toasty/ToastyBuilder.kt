@@ -200,7 +200,6 @@ class ToastyBuilder {
         if (!Toasty.isInitialized) {
             throw IllegalStateException("Toasty没有正确初始化")
         }
-        Log.i(TAG, toString())
         Toasty.toastyHandler.show(this)
     }
 
@@ -220,7 +219,7 @@ class ToastyBuilder {
                 "offsetXdp=$offsetXdp, " +
                 "offsetYdp=$offsetYdp, " +
                 "gravity=${gravity.gravityToString()}, " +
-                "customView=$customView" +
+                "customView=$customView, " +
                 "reshow=$reshow" +
                 ")"
     }

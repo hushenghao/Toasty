@@ -83,23 +83,25 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
      * 隐藏Toast
      */
     private fun hideToastInternal(entry: ToastEntry, reshow: Boolean) {
+        val builder = entry.builder
+        val needReshow = reshow && builder.reshow
+        if (needReshow) {
+            val showMillis = SystemClock.uptimeMillis() - entry.showWhen
+            val surplusMillis = builder.duration - showMillis
+            if (showMillis < IGNORE_RESHOW_DURATION && surplusMillis > 0) {
+                // 没有显示完，更新显示时间重新显示
+                builder.duration(surplusMillis)
+                toastQueue.remove(builder)
+                toastQueue.addFirst(builder)
+            }
+        }
+
         val attachAct = entry.attachAct
-        if (attachAct == null || entry.builder.isNative) {
+        if (attachAct == null || builder.isNative) {
             Toasty.nativeToastImpl.hideNative(entry.toastObj as? Toast)
 
             showNext()
             return
-        }
-
-        val needReshow = reshow && entry.builder.reshow
-        if (needReshow) {
-            val surplus = SystemClock.uptimeMillis() - entry.showWhen
-            if (surplus < IGNORE_RESHOW_DURATION && surplus < entry.builder.duration) {
-                // 没有显示完，更新显示时间重新显示
-                entry.builder.duration(surplus)
-                toastQueue.remove(entry.builder)
-                toastQueue.addFirst(entry.builder)
-            }
         }
 
         val t = entry.toastObj
@@ -117,6 +119,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
      * 显示Toast
      */
     private fun showToastInternal(builder: ToastyBuilder) {
+        Log.i(TAG, "show: $builder")
         val attachAct = this.currentAct
         if (builder.isNative || attachAct == null || attachAct.isFinished()) {
             val toast = Toasty.nativeToastImpl.showNative(builder)
@@ -255,10 +258,10 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
     /** [GlobalActivityLifecycleObserver.lifecycleCallback] */
 
     override fun onCreate(activity: Activity) {
-        // showWithLifecycle(activity)
     }
 
     override fun onStart(activity: Activity) {
+        showWithLifecycle(activity)
     }
 
     override fun onResume(activity: Activity) {
@@ -267,10 +270,10 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
     }
 
     override fun onPause(activity: Activity) {
-        hideWithLifecycle(activity)
     }
 
     override fun onStop(activity: Activity) {
+        hideWithLifecycle(activity)
     }
 
     override fun onDestroy(activity: Activity) {
@@ -302,18 +305,18 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         if (activity == currentAct) {
             currentAct = null
         }
-        cancelShowMessage(activity)
+        // cancelShowMessage(activity)
         val toastEntry = showingToastEntry
         if (toastEntry != null && toastEntry.attachAct == activity) {
             // TODO fix WindowManagerStrategy window leaked
-            hideNow(toastEntry, true)
+            hideNow(toastEntry, toastEntry.builder.reshow)
         }
     }
 
     // Hide now. fix window leaked warn
     private fun hideNow(toastEntry: ToastEntry, reshow: Boolean) {
-        hideToastInternal(toastEntry, reshow)
         cancelHideMessage(toastEntry)
+        hideToastInternal(toastEntry, reshow)
     }
 
     private fun cancelShowMessage(obj: Activity?) {
