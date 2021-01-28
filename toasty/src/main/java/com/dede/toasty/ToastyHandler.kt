@@ -222,6 +222,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
      * 显示Toast
      */
     fun show(builder: ToastyBuilder) {
+        // todo 判断currentAct不可见时不显示Toast
         when (builder.replaceType) {
             Toasty.REPLACE_NOW -> {
                 toastQueue.addFirst(builder)
