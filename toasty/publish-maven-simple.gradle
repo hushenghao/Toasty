@@ -42,7 +42,8 @@ afterEvaluate { project ->
             mavenDeployer {
                 pom.groupId = "com.che300.toasty"
                 pom.artifactId = "toasty"
-                pom.version = "1.0.0-SNAPSHOT"
+//                pom.version = "1.0.0-SNAPSHOT"
+                pom.version = "1.0.0"
 
                 repository(url: getReleaseRepositoryUrl()) {
                     authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
