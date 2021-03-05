@@ -1,5 +1,6 @@
 package com.dede.toasty
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.Context
@@ -27,6 +28,7 @@ object Toasty {
     const val DEFAULT_OFFSET_Y_DIP = 50f
 
     internal val activityLifecycleObserver = GlobalActivityLifecycleObserver()
+    @SuppressLint("StaticFieldLeak")
     internal val toastyHandler = ToastyHandler()// Toasty调度Handler
 
     internal lateinit var applicationContext: Context
@@ -36,6 +38,7 @@ object Toasty {
     internal lateinit var toastyStrategy: ToastyStrategy<Any>// 当前Toasty实现
 
     internal val nativeToastImpl: NativeToastImpl = NativeToastImpl()// 显示系统Toast
+    private var toastyErrorCallback: ToastyErrorCallback? = null
 
     internal val isInitialized: Boolean
         get() {
@@ -48,6 +51,7 @@ object Toasty {
      * @param application Application
      * @param viewFactory [ViewFactory]
      * @param toastyStrategy [ToastyStrategy]
+     * @param toastyErrorCallback [ToastyErrorCallback] toast 异常回调
      *
      * @see ToastyViewFactory 默认的Toasty布局
      *
@@ -60,11 +64,13 @@ object Toasty {
     fun init(
         application: Application,
         viewFactory: ViewFactory = ToastyViewFactory(),
-        toastyStrategy: ToastyStrategy<*> = DialogToastyStrategy()
+        toastyStrategy: ToastyStrategy<*> = DialogToastyStrategy(),
+        toastyErrorCallback: ToastyErrorCallback? = null
     ) {
         applicationContext = application.applicationContext
         Toasty.viewFactory = viewFactory
         Toasty.toastyStrategy = toastyStrategy as ToastyStrategy<Any>
+        Toasty.toastyErrorCallback = toastyErrorCallback
         activityLifecycleObserver.register(application)
     }
 
@@ -96,6 +102,10 @@ object Toasty {
      */
     fun clear() {
         toastyHandler.clear()
+    }
+
+    internal fun postError(e: Exception) {
+        toastyErrorCallback?.invoke(e)
     }
 
 

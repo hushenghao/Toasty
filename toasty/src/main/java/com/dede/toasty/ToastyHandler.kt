@@ -108,7 +108,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         try {
             Toasty.toastyStrategy.hide(attachAct, t)
         } catch (e: Exception) {
-            Log.e(TAG, "hideToastInternal: ", e)
+            Toasty.postError(e)
         }
 
         // 显示下一个Toast
@@ -135,7 +135,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
             val toastEntry = ToastEntry(builder, toastObj, attachAct, SystemClock.uptimeMillis())
             sendHideMessage(toastEntry, builder.duration)
         } catch (e: Exception) {
-            Log.e(TAG, "showToastInternal: ", e)
+            Toasty.postError(e)
         }
     }
 
@@ -161,7 +161,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
             val newEntry = ToastEntry(builder, toastObj, attachAct, SystemClock.uptimeMillis())
             sendHideMessage(newEntry, builder.duration)
         } catch (e: Exception) {
-            Log.e(TAG, "updateToastInternal: ", e)
+            Toasty.postError(e)
         }
     }
 
