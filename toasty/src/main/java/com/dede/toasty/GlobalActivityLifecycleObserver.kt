@@ -9,6 +9,11 @@ import android.os.Bundle
  */
 internal class GlobalActivityLifecycleObserver : Application.ActivityLifecycleCallbacks {
 
+    companion object {
+        var isForeground = false
+            private set
+    }
+
     fun register(application: Application) {
         application.unregisterActivityLifecycleCallbacks(this)
         application.registerActivityLifecycleCallbacks(this)
@@ -26,11 +31,16 @@ internal class GlobalActivityLifecycleObserver : Application.ActivityLifecycleCa
     var lifecycleCallback: LifecycleListener? = null
         internal set
 
+    private var activeCount = 0
+
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         lifecycleCallback?.onCreate(activity)
     }
 
     override fun onActivityStarted(activity: Activity) {
+        if (activeCount++ == 0) {
+            isForeground = true
+        }
         lifecycleCallback?.onStart(activity)
     }
 
@@ -43,6 +53,9 @@ internal class GlobalActivityLifecycleObserver : Application.ActivityLifecycleCa
     }
 
     override fun onActivityStopped(activity: Activity) {
+        if (--activeCount == 0) {
+            isForeground = false
+        }
         lifecycleCallback?.onStop(activity)
     }
 

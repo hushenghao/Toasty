@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun open(view: View) {
-        startActivity(Intent(this, SecondActivity::class.java))
+        startActivityForResult(Intent(this, SecondActivity::class.java), 10)
     }
 
     fun view(view: View) {

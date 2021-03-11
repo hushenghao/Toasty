@@ -1,5 +1,7 @@
 package com.dede.toasty_demo
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -44,6 +46,7 @@ class SecondActivity : AppCompatActivity() {
 
     fun toastFinish(view: View) {
         Toasty.with().message("第二个页面！Finish").duration(Toasty.TOAST_SHORT).show()
+        setResult(Activity.RESULT_OK, Intent())
         finish()
     }
 

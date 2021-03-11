@@ -48,10 +48,20 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
                 }
                 val toastBuilder = toastQueue.pop()// 消费当前toast
                 val toastEntry = showingToastEntry
+
+                val attachAct = this.currentAct
+                // 应用在后台且不是原生toast
+                if (!isForeground && !toastBuilder.isNative) {// 非原生Toast
+                    if (attachAct.isFinished()) {
+                        // 页面在关闭中
+                        toastQueue.addFirst(toastBuilder)
+                        return
+                    }
+                }
                 when (toastBuilder.replaceType) {
                     Toasty.REPLACE_NOW -> {
                         if (toastEntry != null) {
-                            if (toastBuilder.isNative == toastEntry.builder.isNative) {
+                            if (toastBuilder.isNative == toastEntry.isNative) {
                                 // 类型相同才能替换
                                 updateToastInternal(toastBuilder, toastEntry)
                             } else {
@@ -97,7 +107,7 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         }
 
         val attachAct = entry.attachAct
-        if (attachAct == null || builder.isNative) {
+        if (attachAct == null || entry.isNative) {
             Toasty.nativeToastImpl.hideNative(entry.toastObj as? Toast)
 
             showNext()
@@ -121,9 +131,9 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
     private fun showToastInternal(builder: ToastyBuilder) {
         Log.i(TAG, "show: $builder")
         val attachAct = this.currentAct
-        if (builder.isNative || attachAct == null || attachAct.isFinished()) {
+        if (builder.isNative || attachAct == null) {
             val toast = Toasty.nativeToastImpl.showNative(builder)
-            val newEntry = ToastEntry(builder, toast, attachAct, -1)
+            val newEntry = ToastEntry(builder, toast, attachAct, -1, true)
             sendHideMessage(newEntry, builder.nativeDurationMillis())
             return
         }
@@ -146,9 +156,9 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         cancelHideMessage(toastEntry)
 
         val attachAct = this.currentAct
-        if (builder.isNative || attachAct == null || attachAct.isFinished()) {
+        if (builder.isNative || attachAct == null) {
             val toast = Toasty.nativeToastImpl.updateNative(builder, toastEntry.toastObj as? Toast)
-            val newEntry = ToastEntry(builder, toast, attachAct, -1)
+            val newEntry = ToastEntry(builder, toast, attachAct, -1, true)
             sendHideMessage(newEntry, builder.nativeDurationMillis())
             return
         }
@@ -215,8 +225,11 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
         /** Toast依附的Activity对象 */
         val attachAct: Activity?,
         /** 显示时的时间 */
-        val showWhen: Long
+        val showWhen: Long,
+        val isNative: Boolean = false
     )
+
+    private val isForeground get() = GlobalActivityLifecycleObserver.isForeground
 
     /**
      * 显示Toast
@@ -239,6 +252,9 @@ internal class ToastyHandler : Handler(Looper.getMainLooper()),
             Toasty.REPLACE_BEHIND -> {
                 toastQueue.add(builder)
             }
+        }
+        if (!isForeground && !builder.isNative) {
+            return
         }
         sendShowMessage(currentAct, builder.showDelay)
     }
