@@ -29,11 +29,15 @@ def getSnapshotRepositoryUrl() {
 }
 
 def getRepositoryUsername() {
-    return hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
+    def localProps = new Properties()
+    localProps.load(rootProject.file("local.properties").newInputStream())
+    return localProps.getOrDefault('NEXUS_USERNAME', "").toString()
 }
 
 def getRepositoryPassword() {
-    return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
+    def localProps = new Properties()
+    localProps.load(rootProject.file("local.properties").newInputStream())
+    return localProps.getOrDefault('NEXUS_PASSWORD', "").toString()
 }
 
 afterEvaluate { project ->
