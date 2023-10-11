@@ -37,6 +37,9 @@ object Toasty {
     internal lateinit var viewFactory: ViewFactory// Toasty View工厂
     internal lateinit var toastyStrategy: ToastyStrategy<Any>// 当前Toasty实现
 
+    @SuppressLint("StaticFieldLeak")
+    internal lateinit var toastDefaultConfig: ToastyBuilder// 默认Toast配置
+
     internal val nativeToastImpl: NativeToastImpl = NativeToastImpl()// 显示系统Toast
     private var toastyErrorCallback: ToastyErrorCallback? = null
 
@@ -52,6 +55,7 @@ object Toasty {
      * @param viewFactory [ViewFactory]
      * @param toastyStrategy [ToastyStrategy]
      * @param toastyErrorCallback [ToastyErrorCallback] toast 异常回调
+     * @param toastDefaultConfig [ToastyBuilder] toast 默认配置
      *
      * @see ToastyViewFactory 默认的Toasty布局
      *
@@ -65,12 +69,14 @@ object Toasty {
         application: Application,
         viewFactory: ViewFactory = ToastyViewFactory(),
         toastyStrategy: ToastyStrategy<*> = DialogToastyStrategy(),
-        toastyErrorCallback: ToastyErrorCallback? = null
+        toastyErrorCallback: ToastyErrorCallback? = null,
+        toastDefaultConfig: ToastyBuilder = ToastyBuilder(),
     ) {
         applicationContext = application.applicationContext
         Toasty.viewFactory = viewFactory
         Toasty.toastyStrategy = toastyStrategy as ToastyStrategy<Any>
         Toasty.toastyErrorCallback = toastyErrorCallback
+        Toasty.toastDefaultConfig = toastDefaultConfig
         activityLifecycleObserver.register(application)
     }
 
@@ -81,7 +87,7 @@ object Toasty {
     @JvmStatic
     @JvmOverloads
     fun with(message: CharSequence? = null): ToastyBuilder {
-        val toastBuilder = ToastyBuilder()
+        val toastBuilder = ToastyBuilder(toastDefaultConfig)
         toastBuilder.message(message)
         return toastBuilder
     }
@@ -92,7 +98,7 @@ object Toasty {
      */
     @JvmStatic
     fun with(@StringRes resId: Int): ToastyBuilder {
-        val toastyBuilder = ToastyBuilder()
+        val toastyBuilder = ToastyBuilder(toastDefaultConfig)
         toastyBuilder.message(resId)
         return toastyBuilder
     }

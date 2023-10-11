@@ -20,12 +20,12 @@ apply plugin: 'maven'
 
 def getReleaseRepositoryUrl() {
     return hasProperty('RELEASE_REPOSITORY_URL') ? RELEASE_REPOSITORY_URL
-            : "http://172.16.0.236:8081/repository/maven-releases/"
+            : "https://nexus-java.devops.guchele.com/repository/android-releases/"
 }
 
 def getSnapshotRepositoryUrl() {
     return hasProperty('SNAPSHOT_REPOSITORY_URL') ? SNAPSHOT_REPOSITORY_URL
-            : "http://172.16.0.236:8081/repository/maven-snapshots/"
+            : "https://nexus-java.devops.guchele.com/repository/android-snapshots/"
 }
 
 def getRepositoryUsername() {
@@ -42,8 +42,8 @@ afterEvaluate { project ->
             mavenDeployer {
                 pom.groupId = "com.che300.toasty"
                 pom.artifactId = "toasty"
-//                pom.version = "1.0.2-SNAPSHOT"
-                pom.version = "1.0.2"
+//                pom.version = "1.1.0-SNAPSHOT"
+                pom.version = "1.1.0"
 
                 repository(url: getReleaseRepositoryUrl()) {
                     authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())

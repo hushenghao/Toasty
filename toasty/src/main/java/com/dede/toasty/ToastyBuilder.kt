@@ -6,10 +6,17 @@ import android.view.View
 import androidx.annotation.IntRange
 import androidx.annotation.StringRes
 
-class ToastyBuilder {
+class ToastyBuilder() {
 
     companion object {
         private const val TAG = "ToastyBuilder"
+    }
+
+    constructor(temp: ToastyBuilder) : this() {
+        duration(temp.duration)
+        offset(temp.offsetXdp, temp.offsetYdp)
+        gravity(temp.gravity)
+        replaceType(temp.replaceType)
     }
 
     /**
