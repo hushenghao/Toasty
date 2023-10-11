@@ -47,7 +47,8 @@ Toasty.with()
 //       PopupWindowStrategy()
 //       WindowManagerStrategy()
         , viewFactory = ToastyViewFactory(),// 默认的Toast布局
-        toastyErrorCallback = { it.printStackTrace() }
+        toastyErrorCallback = { it.printStackTrace() },
+        toastDefaultConfig = ToastBuilder().gravity(Gravity.CENTER)
     )
 ```
 

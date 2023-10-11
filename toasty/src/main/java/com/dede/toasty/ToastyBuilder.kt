@@ -12,7 +12,7 @@ class ToastyBuilder() {
         private const val TAG = "ToastyBuilder"
     }
 
-    constructor(temp: ToastyBuilder) : this() {
+    internal constructor(temp: ToastyBuilder) : this() {
         duration(temp.duration)
         offset(temp.offsetXdp, temp.offsetYdp)
         gravity(temp.gravity)

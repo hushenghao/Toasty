@@ -1,8 +1,10 @@
 package com.dede.toasty_demo
 
 import android.app.Application
+import android.view.Gravity
 import com.dede.toasty.DialogToastyStrategy
 import com.dede.toasty.Toasty
+import com.dede.toasty.ToastyBuilder
 import com.dede.toasty.ToastyViewFactory
 
 class App : Application() {
@@ -18,7 +20,8 @@ class App : Application() {
                 viewFactory = ToastyViewFactory(),
                 toastyErrorCallback = {
                     it.printStackTrace()
-                }
+                },
+                toastDefaultConfig = ToastyBuilder().gravity(Gravity.CENTER)
             )
         }
     }
